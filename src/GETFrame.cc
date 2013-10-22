@@ -141,7 +141,7 @@ void GETFrame::CalcPedestal(Int_t startTb, Int_t numTbs)
       Int_t index = GetIndex(iAget, iCh, startTb);
 
       Double_t pedestal[2] = {0};
-      for (Int_t iTb = 0; iTb < numTbs; iTb++) {
+      for (Int_t iTb = startTb; iTb < startTb + numTbs; iTb++) {
         pedestal[0] += (fRawAdc[index + iTb] - pedestal[0])/(Double_t)(iTb + 1);
 
         if (iTb > 0)
