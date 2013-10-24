@@ -142,10 +142,10 @@ void GETFrame::CalcPedestal(Int_t startTb, Int_t numTbs)
 
       Double_t pedestal[2] = {0};
       for (Int_t iTb = startTb; iTb < startTb + numTbs; iTb++) {
-        pedestal[0] += (fRawAdc[index + iTb] - pedestal[0])/(Double_t)(iTb + 1);
+        pedestal[0] += (fRawAdc[index + iTb] - pedestal[0])/(Double_t)(iTb - startTb + 1);
 
-        if (iTb > 0)
-          pedestal[1] = iTb*pedestal[1]/(Double_t)(iTb + 1) + pow(fRawAdc[index + iTb] - pedestal[0], 2)/(Double_t)(iTb);
+        if (iTb - startTb > 0)
+          pedestal[1] = (iTb - startTb)*pedestal[1]/(Double_t)(iTb - startTb + 1) + pow(fRawAdc[index + iTb] - pedestal[0], 2)/(Double_t)(iTb - startTb);
       }
 
       pedestal[1] = sqrt(pedestal[1]);
