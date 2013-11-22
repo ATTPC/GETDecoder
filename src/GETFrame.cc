@@ -220,5 +220,20 @@ Int_t GETFrame::GetIndex(Int_t agetIdx, Int_t chIdx, Int_t buckIdx)
 {
   // Internally used method to get the index of the array.
 
+  if (agetIdx > 3) {
+    std::cout << "== AGET number should be in [0,3]!" << std::endl;
+
+    return -1;
+  } else if (chIdx > 67) {
+    std::cout << "== Channel number should be in [0,67]!" << std::endl;
+
+    return -1;
+  } else if (buckIdx > GETNumTbs) {
+    std::cout << "== Channel number should be in [0," << GETNumTbs << "]!" << std::endl;
+
+    return -1;
+  }
+
+
   return agetIdx*68*GETNumTbs + chIdx*GETNumTbs + buckIdx;
 }
