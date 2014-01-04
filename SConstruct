@@ -8,7 +8,6 @@ dictName = target + 'Dict.cc'
 headers = Glob(incdir + '/*.hh')
 dictHeaders = ''
 for header in headers:
-  dictHeaders += str(header) + ' '
 
 linkdefName = target + 'LinkDef.hh'
 linkdefFile = open(linkdefName, 'w')
