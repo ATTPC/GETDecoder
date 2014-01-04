@@ -1,9 +1,6 @@
 // =================================================
 //  GETMath Class
 // 
-//  Description:
-//    Thinking what to write
-// 
 //  Author:
 //    Genie Jhang ( geniejhang@majimak.com )
 //  
@@ -18,24 +15,37 @@
 #include "TObject.h"
 #include "TROOT.h"
 
+/*!
+  * Basically, what this class does is the same as TH1D class in ROOT. 
+  * The difference is that this class only provides the **mean** and **RMS** values.
+  * Nothing else!
+ **/
+
 class GETMath : public TObject
 {
   public:
+    //! Constructor
     GETMath();
+    //! Destructor
     virtual ~GETMath();
 
+    //! With the mean and RMS, calculated before, use the **value** to calculate new **mean** and **RMS** recursively.
     void Add(Double_t value);
+    //! Return the calculated **mean** value.
     Double_t GetMean();
+    //! Return the calculated **RMS** value.
     Double_t GetRMS();
 
+    //! Reset all the values.
     void Reset();
 
   private:
-    Int_t fNumValues;
-    Double_t fMean;
-    Double_t fRms;
+    Int_t fNumValues; //!< Number of values added
+    Double_t fMean; //!< mean value
+    Double_t fRms; //!< RMS value
 
-  ClassDef(GETMath, 1);
+  //! Added for dictionary making by ROOT
+  ClassDef(GETMath, 1); 
 };
 
 #endif

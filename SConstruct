@@ -8,8 +8,7 @@ dictName = target + 'Dict.cc'
 headers = Glob(incdir + '/*.hh')
 dictHeaders = ''
 for header in headers:
-  if str(header) != incdir + '/GETConfig.hh':
-    dictHeaders += str(header) + ' '
+  dictHeaders += str(header) + ' '
 
 linkdefName = target + 'LinkDef.hh'
 linkdefFile = open(linkdefName, 'w')
@@ -18,9 +17,8 @@ linkdefFile.write('#pragma link off all globals;\n')
 linkdefFile.write('#pragma link off all classes;\n')
 linkdefFile.write('#pragma link off all functions;\n\n')
 for header in headers:
-  if str(header) != incdir + '/GETConfig.hh':
-    className = str(header).replace(incdir + '/', '').replace('.hh', '')
-    linkdefFile.write('#pragma link C++ class ' + className + '+;\n')
+  className = str(header).replace(incdir + '/', '').replace('.hh', '')
+  linkdefFile.write('#pragma link C++ class ' + className + '+;\n')
 linkdefFile.write('\n#endif')
 linkdefFile.close()
 
