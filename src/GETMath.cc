@@ -25,13 +25,13 @@ GETMath::~GETMath()
 {
 }
 
-/*!
-This method uses the formulae below to calculate mean and RMS. <br>
-\f$\text{mean}\Rightarrow \mu_{n+1} = \mu_n + \displaystyle\frac{x_n - \mu_n}{n + 1},\quad(n\leq0)\f$ <br>
-\f$\text{RMS}\Rightarrow\sigma^2_{n+1} = \displaystyle\frac{n}{n + 1}\sigma^2_n + \displaystyle\frac{(x_n - \mu_{n+1})^2}{n},\quad(n>0)\f$ 
-*/
 void GETMath::Add(Double_t value)
 {
+  /**
+    * This method uses the formulae below to calculate mean and RMS. <br>
+    * \f$\text{mean}\Rightarrow \mu_{n+1} = \mu_n + \displaystyle\frac{x_{n+1} - \mu_n}{n + 1},\quad(n\leq0)\f$ <br>
+    * \f$\text{RMS}\Rightarrow\sigma^2_{n+1} = \displaystyle\frac{n}{n + 1}\sigma^2_n + \displaystyle\frac{(x_{n+1} - \mu_{n+1})^2}{n},\quad(n>0)\f$ 
+   **/
   fMean += (value - fMean)/(Double_t)(fNumValues + 1);
   
   if (fNumValues > 0)
