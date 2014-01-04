@@ -1,9 +1,6 @@
 // =================================================
 //  GETPlot Class
 // 
-//  Description:
-//    Thinking what to write
-// 
 //  Author:
 //    Genie Jhang ( geniejhang@majimak.com )
 //  
@@ -34,27 +31,20 @@ ClassImp(GETPlot);
 
 GETPlot::GETPlot()
 {
-  // Constructor
-
   Initialize();
 }
 
 GETPlot::GETPlot(GETDecoder *decoder)
 {
-  // Constructor
   Initialize();
   SetDecoder(decoder);
 }
 
 GETPlot::~GETPlot()
-{
-  // Destructor
-}
+{}
 
 void GETPlot::Initialize()
 {
-  // Initializes variables
-
   minTb = 0;
   maxTb = GETNumTbs;
 
@@ -71,8 +61,6 @@ void GETPlot::Initialize()
 
 void GETPlot::SetDecoder(GETDecoder *decoder)
 {
-  // Sets the decoder pointer
-
   fDecoder = decoder;
 
   SetAgetRange(-1, -1, minTb - 1, maxTb + 1, -10, 4106);
@@ -88,13 +76,12 @@ void GETPlot::SetDecoder(GETDecoder *decoder)
 
 void GETPlot::SetAgetRange(Int_t type, Int_t agetIdx, Double_t minx, Double_t maxx, Double_t miny, Double_t maxy)
 {
-  // Sets the plotting range.
-  // 
-  // Type:
-  //    0 - not assigned
-  //    1 - canvas returned by GetRawFrame() method
-  //    2 - canvas returned by GetFrame() method
-  //    3 - canvas returned by GetAverage() method
+  /** \param type
+    *        0 - not assigned <br>
+    *        1 - canvas returned by GetRawFrame() method <br>
+    *        2 - canvas returned by GetFrame() method <br>
+    *        3 - canvas returned by GetAverage() method <br>
+   **/
 
   if (type == -1) {
     for (Int_t iType = 0; iType < 4; iType++) {
@@ -115,12 +102,6 @@ void GETPlot::SetAgetRange(Int_t type, Int_t agetIdx, Double_t minx, Double_t ma
 
 TCanvas *GETPlot::ShowSummarySpectra(Int_t startTb, Int_t numTbs)
 {
-  // Draws the summary spectra of the file set to the decoder,
-  // and returns the canvas.
-  // 
-  // startTb: time bucket index from which the pedestal calculation starts
-  //  numTbs: the number of time buckets to use in the pedestal calculation
-
   if (fDecoder == NULL) {
     std::cout << "== GETDecoder is not set!" << std::endl;
 
@@ -177,22 +158,21 @@ TCanvas *GETPlot::ShowSummarySpectra(Int_t startTb, Int_t numTbs)
 
 TCanvas *GETPlot::ShowRawFrame(Int_t frameNo, Int_t numChannels, Int_t *chList)
 {
-  // Draw raw signals in the frame whose number is frameNo.
-  //
-  //     frameNo: frame number that will be drawn.
-  //              If -1, the method automatically load the next frame.
-  // numChannels: the number of channels which will be drawn (positive number)
-  //              or will be masked (negative number).
-  //      chList: an array having the channel numbers
-  //              array size should be bigger than the absolute value numChannels
-  //
-  // example)
-  //   ShowRawFrame(): draws all the channels
-  //   ShowRawFrame(2): draw all the channels in the frame number 2
-  //
-  //   Int_t list[4] = {11, 22, 45, 56};
-  //   ShowRawFrame(-1, 4, list): draws 4 channels in the array, list, of the next frame
-  //   ShowRawFrame(-1, -4, list): draws all channels except 4 channels in the array, list, of the next frame
+  /**
+    * \par Usage
+    *  ShowRawFrame(): draws all the channels <br>
+    *  ShowRawFrame(2): draw all the channels in the frame number 2 <br><br>
+    *  Int_t list[4] = {11, 22, 45, 56}; <br>
+    *  ShowRawFrame(-1, 4, list): draws 4 channels in the array, list, of the next frame <br>
+    *  ShowRawFrame(-1, -4, list): draws all channels except 4 channels in the array, list, of the next frame
+    *
+    * \param frameNo frame number that will be drawn.
+    *                If -1, the method automatically load the next frame.
+    * \param numChannels the number of channels which will be drawn (positive number)
+    *                    or will be masked (negative number).
+    * \param chList an array having the channel numbers
+    *               array size should be bigger than the absolute value numChannels
+   **/
 
   if (fDecoder == NULL) {
     std::cout << "== GETDecoder is not set!" << std::endl;
@@ -275,18 +255,19 @@ TCanvas *GETPlot::ShowRawFrame(Int_t frameNo, Int_t numChannels, Int_t *chList)
 
 TCanvas *GETPlot::ShowFrame(Int_t frameNo, Int_t startTb, Int_t numTbs, Int_t numChannels, Int_t *chList)
 {
-  // Draw pedestal-subtracted signals in the frame whose number is frameNo.
-  //
-  //     frameNo: frame number that will be drawn.
-  //              If -1, the method automatically load the next frame.
-  //     startTb: time bucket index from which the pedestal calculation starts
-  //      numTbs: the number of time buckets to use in the pedestal calculation
-  // numChannels: the number of channels which will be drawn (positive number)
-  //              or will be masked (negative number).
-  //      chList: an array having the channel numbers
-  //              array size should be bigger than the absolute value numChannels
-  //
-  // example) See ShowRawFrame() method.
+  /**
+    * \par Usage
+    *      See ShowRawFrame() method.
+    *
+    * \param frameNo frame number that will be drawn.
+    *                If -1, the method automatically load the next frame.
+    * \param startTb time bucket index from which the pedestal calculation starts
+    * \param numTbs the number of time buckets to use in the pedestal calculation
+    * \param numChannels the number of channels which will be drawn (positive number)
+    *                    or will be masked (negative number).
+    * \param chList an array having the channel numbers
+    *               array size should be bigger than the absolute value numChannels
+   **/
 
   if (fDecoder == NULL) {
     std::cout << "== GETDecoder is not set!" << std::endl;
@@ -372,16 +353,17 @@ TCanvas *GETPlot::ShowFrame(Int_t frameNo, Int_t startTb, Int_t numTbs, Int_t nu
 
 TCanvas *GETPlot::ShowAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
 {
-  // Draw averaged-raw signals in the frame whose number is frameNo.
-  //
-  // numChannels: the number of channels which will be averaged (positive number)
-  //              or will be masked in averaging (negative number).
-  //      chList: an array having the channel numbers
-  //              array size should be bigger than the absolute value of numChannels
-  //     frameNo: frame number that will be drawn.
-  //              If -1, the method automatically load the next frame.
-  //
-  // example)
+  /**
+    * \par Usage
+    *      See ShowRawFrame() method.
+    *
+    * \param numChannels the number of channels which will be averaged (positive number)
+    *                    or will be masked in averaging (negative number).
+    * \param chList an array having the channel numbers
+    *               array size should be bigger than the absolute value of numChannels
+    * \param frameNo frame number that will be drawn.
+    *                If -1, the method automatically load the next frame.
+   **/
 
   if (fDecoder == NULL) {
     std::cout << "== GETDecoder is not set!" << std::endl;
@@ -460,8 +442,6 @@ TCanvas *GETPlot::ShowAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
 
 TCanvas *GETPlot::PrepareCanvas(Int_t type)
 {
-  // Internal method to prepare canvases
-
   TCanvas *cvs = NULL;
 
   if (type == 0) {
@@ -522,8 +502,6 @@ TCanvas *GETPlot::PrepareCanvas(Int_t type)
 
 void GETPlot::ResetGraph(Int_t type, Bool_t first)
 {
-  // Internal function to prepare canvases
-
   TCanvas *cvs = (TCanvas *) gROOT -> FindObject(Form("cvsType%d", type));
 
   for (Int_t iAget = 0; iAget < 4; iAget++) {
@@ -555,8 +533,6 @@ void GETPlot::ResetGraph(Int_t type, Bool_t first)
 
 void GETPlot::PrintInfo(Int_t type, TPad *namePad, Int_t coboIdx, Int_t asadIdx, Int_t frameNo)
 {
-  // Internal function to prepare canvases
-
   namePad -> cd();
 
   TText *name = (TText *) namePad -> FindObject("frameInfo");

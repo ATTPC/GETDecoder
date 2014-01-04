@@ -1,9 +1,6 @@
 // =================================================
 //  GETPlot Class
 // 
-//  Description:
-//    Thinking what to write
-// 
 //  Author:
 //    Genie Jhang ( geniejhang@majimak.com )
 //  
@@ -30,43 +27,57 @@ class TText;
 class GETPlot : public TObject
 {
   public:
+    //! Constructor
     GETPlot();
+    //! Construct with GETDecoder pointer
     GETPlot(GETDecoder *decoder);
-    ~GETPlot();
+    //! Destructor
+    virtual ~GETPlot();
 
-    // setters
+    //! Set the decoder pointer.
     void SetDecoder(GETDecoder *decoder);
 
+    //! Set the plotting range.
     void SetAgetRange(Int_t type, Int_t agetIdx, Double_t minx, Double_t maxx, Double_t miny, Double_t maxy);
 
-    // getters
-    TCanvas *ShowSummarySpectra(Int_t startTb = 10, Int_t numTbs = 20);
+    //! Draw the summary spectra of the file set to the decoder, and return the canvas.
+    TCanvas *ShowSummarySpectra(Int_t startTb = 10, //!< Starting time bucket index
+                                Int_t numTbs = 20 //!< The number of time buckets from startTb in order to calculate pedestal value
+                               );
+    //! Draw raw signals in the frame whose number is frameNo.
     TCanvas *ShowRawFrame(Int_t frameNo = -1, Int_t numChannels = 0, Int_t *chList = NULL);
+    //! Draw pedestal-subtracted signals in the frame whose number is frameNo.
     TCanvas *ShowFrame(Int_t frameNo = -1, Int_t startTb = 10, Int_t numTbs = 20, Int_t numChannels = 0, Int_t *chList = NULL);
+    //! Draw averaged-raw signals in the frame whose number is frameNo.
     TCanvas *ShowAverage(Int_t numChannels, Int_t *chList, Int_t frameNo = -1);
 
   private:
+    //! Initialize variables.
     void Initialize();
 
-    Int_t minTb;
-    Int_t maxTb;
+    Int_t minTb; //!< minimum time bucket index for drawing
+    Int_t maxTb; //!< maximum time bucket index for drawing
 
-    GETDecoder *fDecoder;
-    GETFrame *fFrame;
+    GETDecoder *fDecoder; //!< decoder pointer
+    GETFrame *fFrame;     //!< frame container pointer
+
+    //! Internal method to prepare canvases
     TCanvas *PrepareCanvas(Int_t type);
+    //! Internal method to reset canvases
     void ResetGraph(Int_t type, Bool_t first = 0);
+    //! Internal method to print information on canvas
     void PrintInfo(Int_t type, TPad *namePad, Int_t coboIdx, Int_t asadIdx, Int_t frameNo);
 
-    TH2D *fAsad;
-    TGraph *fGraph;
-    TGraph *fAget[4];
+    TH2D *fAsad;      //!< histogram for summary spectra of an AsAd
+    TGraph *fGraph;   //!< graph for various purpose for drawing data
+    TGraph *fAget[4]; //!< graph for each AGET
 
-    Double_t fAgetMinX[4][4];
-    Double_t fAgetMaxX[4][4];
-    Double_t fAgetMinY[4][4];
-    Double_t fAgetMaxY[4][4];
+    Double_t fAgetMinX[4][4]; //!< minimum x value for drawing
+    Double_t fAgetMaxX[4][4]; //!< maximum x value for drawing
+    Double_t fAgetMinY[4][4]; //!< minimum y value for drawing
+    Double_t fAgetMaxY[4][4]; //!< maximum y value for drawing
 
-  ClassDef(GETPlot, 1);
+  ClassDef(GETPlot, 1); //!< added for making dictionary by ROOT
 };
 
 #endif
