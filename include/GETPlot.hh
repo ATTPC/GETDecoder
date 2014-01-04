@@ -24,6 +24,9 @@ class TH2D;
 class TPad;
 class TText;
 
+/**
+  * GETPlot class for drawing various fundamental plots fast typing short command.
+ **/
 class GETPlot : public TObject
 {
   public:
