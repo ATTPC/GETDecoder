@@ -1,5 +1,15 @@
+/** 
+  * \example readFrame02.cc
+  *  
+  * \note 
+  *   This example illustrates how to read the pedestal-subtracted data for post-processing. <br>
+  *   Please read carefully the commented lines in source code. <br>
+  *   Change the filename written as `GRAWFILE.graw` in the source code and implement the code under the second commented line.
+  *  
+  * \par Source Code
+ **/
 void readFrame02() {
-  gSystem -> Load("../libGETDecoder.so");
+  gSystem -> Load("libGETDecoder");
 
   GETDecoder *decoder = new GETDecoder("GRAWFILE.graw");
   

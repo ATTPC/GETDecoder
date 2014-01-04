@@ -1,5 +1,14 @@
+/** 
+  * \example readFrame01.cc
+  *  
+  * \note 
+  *   This example illustrates how to read the rawdata for post-processing. <br>
+  *   Change the filename written as `GRAWFILE.graw` in the source code and implement the code under the commented line.
+  *  
+  * \par Source Code
+ **/
 void readFrame01() {
-  gSystem -> Load("../libGETDecoder.so");
+  gSystem -> Load("libGETDecoder");
 
   GETDecoder *decoder = new GETDecoder("GRAWFILE.graw");
   

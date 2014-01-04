@@ -6,9 +6,20 @@
   *  
   * \par Usage
   *      root 'plot01.cc("/path/to/GRAWFILE.graw")'
+  *
   * \par Output
   *      SummarySpectra-CoBo#1-AsAd#2.png <br>
   *      where #1 is CoBo ID and #2 is AsAd ID.
+  *
+  * \note
+  *   The line below draws the summary spectra of the set file. <br>
+  *   In drawing, the pedestal is calculated with 20 time buckets
+  *   starting from 10th time bucket.
+  *   \code{.cc}
+  *   TCanvas *cvs = plot -> ShowSummarySpectra(10, 20);
+  *   \endcode
+  *
+  * \par Source Code
  **/
 void plot01(Char_t *filename)
 {
