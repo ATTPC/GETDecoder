@@ -1,12 +1,25 @@
-void plot01(Char_t *filename) {
+/** 
+  * \example plot01.cc
+  *  
+  * This example draws a summary spectra using all the frames in the specified rawdata file. 
+  * Make sure that the shared library file is in the same folder in this example macro file.
+  *  
+  * \par Usage
+  *      root 'plot01.cc("/path/to/GRAWFILE.graw")'
+  * \par Output
+  *      SummarySpectra-CoBo#1-AsAd#2.png <br>
+  *      where #1 is CoBo ID and #2 is AsAd ID.
+ **/
+void plot01(Char_t *filename)
+{
   if (filename == "") {
     cout << "Run 'root \'plot01.cc(\"/path/to/GRAWFILE.graw\")\'" << endl;
     return;
   }
   
-  gSystem -> Load("../libGETDecoder.so");
+  gSystem -> Load("libGETDecoder");
 
-  GETDecoder *decoder = new GETDecoder("GRAWFILE.graw");
+  GETDecoder *decoder = new GETDecoder(filename);
   GETPlot *plot = decoder -> GetGETPlot();
 
   GETFrame *frame = decoder -> GetFrame(0);
