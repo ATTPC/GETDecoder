@@ -1,9 +1,6 @@
 // =================================================
 //  GETFrame Class
 // 
-//  Description:
-//    Storage of a frame from GET electronics
-// 
 //  Author:
 //    Genie Jhang ( geniejhang@majimak.com )
 //  

@@ -1,9 +1,6 @@
 // =================================================
 //  GETFrame Class
 // 
-//  Description:
-//    Storage of a frame from CoBo
-// 
 //  Author:
 //    Genie Jhang ( geniejhang@majimak.com )
 //  
@@ -22,6 +19,9 @@ extern const Int_t GETNumTbs;
 
 #include "TObject.h"
 
+/**
+  * Storage of a frame from CoBo
+ **/
 class GETFrame : public TObject
 {
   public:
