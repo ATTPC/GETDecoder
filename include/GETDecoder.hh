@@ -14,6 +14,7 @@
 #define _GETDECODER_H_
 
 #include <fstream>
+#include <vector>
 
 #include "GETConfig.hh"
 
@@ -37,19 +38,22 @@ class GETDecoder : public TObject
 
     //! Setting debug mode. If set to 1, more information is printed out on the screen.
     void SetDebugMode(Bool_t value);
+    //! Add the data file to the list of rawdata.
+    void AddGraw(const Char_t *filename);
     //! Set the data file to the class.
-    Bool_t SetGraw(const Char_t *filename);
+    Bool_t SetData(Int_t index);
+    //! Search the next file and set it if exists. Returns 1 if successful.
+    Bool_t SetNextFile();
+    //! Print rawdata file list on the screen.
+    void ShowList();
 
     //! Return GETPlot object pointer if there exists. If not, create a new one and return it.
     GETPlot *GetGETPlot();
+
     //! Return the number of frames counted by CountFrames() method.
-    Int_t GetNumFrames();
-    //! Return the frame number currently read and returned frame.
     Int_t GetCurrentFrameID();
-    //! Return next frame.
-    GETFrame *GetFrame();
-    //! Return specific frame of given frame number.
-    GETFrame *GetFrame(Int_t frameIdx);
+    //! Return specific frame of given frame number. If frameIdx is -1, thie method returns next frame.
+    GETFrame *GetFrame(Int_t frameIdx = -1);
 
   private:
     //! Initialize variables used in the class.
@@ -60,18 +64,9 @@ class GETDecoder : public TObject
 
     Bool_t fDebugMode; //!< flag for debug mode
 
-    //! Set the data file to the class.
-    Bool_t SetFile(const Char_t *filename);
-    //! Count the number of frames in the set file and continuing files.
-    void CountFrames();
-    //! Searche the next file and set it if exists. Returns 1 if successful.
-    Bool_t IsNextFile();
-
-    Int_t fNumFrames; //!< the number of frames in data file
-  
-    std::ifstream fGraw;   //!< rawdata filestream
-    TString fFirstGraw;    //!< first rawdata filename
-    TString fNextGraw;     //!< next rawdata filename
+    std::ifstream fGraw;            //!< rawdata filestream
+    std::vector<TString> fGrawList; //!< rawdata file list
+    Int_t fCurrentGrawID;        //!< current file index in list
 
     GETFrame *fFrame;      //!< frame container
     Int_t fCurrentFrameID; //!< current frame index

@@ -10,6 +10,7 @@
 // =================================================
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <arpa/inet.h>
 
@@ -26,18 +27,29 @@ ClassImp(GETDecoder);
 
 GETDecoder::GETDecoder()
 {
+  /**
+    * If you use this constructor, you have to add the rawdata using
+    * AddGraw() method and set the file with SetData() method, manually.
+   **/
+   
   Initialize();
 }
 
 GETDecoder::GETDecoder(Char_t *filename)
 {
+  /**
+    * Automatically add the rawdata file to the list
+    * and set the file to read.
+   **/
+
   Initialize();
-  SetGraw(filename);
+  AddGraw(filename);
+  SetData(0);
 }
 
 GETDecoder::~GETDecoder()
 {
-  if(fFrame != NULL)
+  if(fFrame != 0)
     delete fFrame;
 }
 
@@ -45,15 +57,12 @@ void GETDecoder::Initialize()
 {
   fDebugMode = 0;
 
-  fNumFrames = 0;
+  fCurrentGrawID = -1;
 
-  fFirstGraw = "";
-  fNextGraw = "";
-
-  fFrame = NULL;
+  fFrame = 0;
   fCurrentFrameID = -1;
 
-  fGETPlot = NULL;
+  fGETPlot = 0;
 }
 
 void GETDecoder::SetDebugMode(Bool_t value)
@@ -61,50 +70,16 @@ void GETDecoder::SetDebugMode(Bool_t value)
   fDebugMode = value;
 }
 
-Bool_t GETDecoder::SetGraw(const Char_t *filename)
+void GETDecoder::AddGraw(const Char_t *filename)
 {
   /**
-    * After setting, it counts how many frames in the file including continuing files.
-    * This method returns 1 if the file is loaded properly.
-    *
-    * \note This method should be modified when the data file is merged using event builder.
+    * Check if there is a file named `filename`. If exists, add it to the list.
    **/
 
-  Bool_t isSetFile = SetFile(filename);
+  TString nextGraw = filename;
 
-  if (isSetFile)
-    CountFrames();
-
-  return isSetFile;
-}
-
-Bool_t GETDecoder::SetFile(const Char_t *filename)
-{
-  if (fGraw.is_open())
-    fGraw.close();
-
-  fGraw.open(filename, std::ios::in|std::ios::binary);
-
-  if (!(fGraw.is_open())) {
-    std::cout << "== GRAW file open error! Check it exists!" << std::endl;
-
-    return 0;
-  } else {
-    std::cout << "== " << filename << " is opened!" << std::endl;
-    fGraw.seekg(0);
-    fFirstGraw = filename;
-
-    return 1;
-  }
-}
-
-Bool_t GETDecoder::IsNextFile()
-{
-  TObjArray *pathElements = NULL;
-  if (!fNextGraw.EqualTo(""))
-   pathElements = fNextGraw.Tokenize("/");
-  else
-   pathElements = fFirstGraw.Tokenize("/");
+  TObjArray *pathElements = 0;
+  pathElements = nextGraw.Tokenize("/");
 
   Int_t numElements = pathElements -> GetLast();
 
@@ -120,32 +95,74 @@ Bool_t GETDecoder::IsNextFile()
   }
 
   TString tempGrawFile = ((TObjString *) pathElements -> Last()) -> GetString();
-  Int_t fileNumPointer = tempGrawFile.Length() - 9;
-  TString fileNumText = tempGrawFile(fileNumPointer, 4);
-  Int_t nextFileNum = fileNumText.Atoi() + 1;
-  tempGrawFile = tempGrawFile.Replace(fileNumPointer, 4, Form("%04d", nextFileNum));
 
-  Bool_t isNextFile = 0;
-  Int_t msPointer = tempGrawFile.Length() - 13;
-  for (Int_t ms = 0; ms < 999; ms++) {
-    tempGrawFile = tempGrawFile.Replace(msPointer, 3, Form("%03d", ms));
-    fNextGraw = gSystem -> Which(path, tempGrawFile);
-    if (!fNextGraw.EqualTo("")) {
-      std::cout << "== Found continuing file: " << tempGrawFile.Data() << std::endl;
-      isNextFile = 1;
-      break;
+  nextGraw = gSystem -> Which(path, tempGrawFile);
+  if (!nextGraw.EqualTo("")) {
+    std::cout << "== Data file found: " << filename << std::endl;
+
+    Bool_t isExist = 0;
+    for (Int_t iIdx = 0; iIdx < fGrawList.size(); iIdx++) {
+      if (fGrawList.at(0) == nextGraw) {
+        std::cout << "== The file already exists in the list!" << std::endl;
+        isExist = 1;
+      }
     }
-  }
+
+    if (!isExist)
+      fGrawList.push_back(nextGraw);
+  } else
+    std::cout << "== Data file not found: " << filename << std::endl;
 
   delete pathElements;
 
-  if (isNextFile) {
-    fGraw.close();
-    fGraw.open(fNextGraw.Data(), std::ios::in|std::ios::binary);
-    fGraw.seekg(0);
+  return;
+}
+
+Bool_t GETDecoder::SetData(Int_t index)
+{
+  if (fGrawList.size() < index) {
+    std::cout << "== End of list!" << std::endl;
+
+    return 0;
   }
 
-  return isNextFile;
+  if (fGraw.is_open())
+    fGraw.close();
+
+  TString filename = fGrawList.at(index);
+
+  fGraw.open(filename.Data(), std::ios::in|std::ios::binary);
+
+  if (!(fGraw.is_open())) {
+    std::cout << "== GRAW file open error! Check it exists!" << std::endl;
+
+    return 0;
+  } else {
+    std::cout << "== " << filename << " is opened!" << std::endl;
+    fGraw.seekg(0);
+
+    fCurrentGrawID = index;
+
+    return 1;
+  }
+}
+
+Bool_t GETDecoder::SetNextFile()
+{
+  return SetData(fCurrentGrawID + 1);
+}
+
+void GETDecoder::ShowList()
+{
+  std::cout << "== Index  GRAW file" << std::endl;
+  for (Int_t iItem = 0; iItem < fGrawList.size(); iItem++) {
+    if (iItem == fCurrentGrawID)
+      std::cout << " *" << std::setw(6);
+    else
+      std::cout << std::setw(8);
+
+    std::cout << iItem << "  " << fGrawList.at(iItem) << std::endl;
+  }
 }
 
 GETPlot *GETDecoder::GetGETPlot()
@@ -156,69 +173,25 @@ GETPlot *GETDecoder::GetGETPlot()
   return fGETPlot;
 }
 
-Int_t GETDecoder::GetNumFrames()
-{
-  return fNumFrames;
-}
-
 Int_t GETDecoder::GetCurrentFrameID()
 {
   return fCurrentFrameID;
 }
 
-void GETDecoder::CountFrames()
-{
-  /**
-    * \note This method might be removed in future
-    *       because when the rawdata file is quite large, counting the frames takes too much time.
-   **/ 
-
-  fNumFrames = 0;
-  UInt_t frameSize = 0;
-
-  while (1) {
-    fGraw.ignore(1);
-
-    if (fGraw.eof()) {
-      Bool_t isNextFile = IsNextFile();
-
-      if (isNextFile)
-        continue;
-      else 
-        break;
-    }
-
-    fGraw.read(reinterpret_cast<Char_t *>(&frameSize), 3);
-
-    frameSize = (htonl(frameSize) >> 8)*64;
-    fGraw.seekg((Int_t)fGraw.tellg() - 4 + frameSize);
-    fNumFrames++;
-  }
-
-  SetFile(fFirstGraw.Data());
-}
-
-GETFrame *GETDecoder::GetFrame()
-{
-  return GetFrame(fCurrentFrameID + 1);
-}
-
 GETFrame *GETDecoder::GetFrame(Int_t frameNo)
 {
+  if (frameNo == -1)
+    frameNo = fCurrentFrameID + 1;
+
   if (fCurrentFrameID == frameNo) {
     if (fDebugMode)
       PrintFrameInfo(frameNo, fFrame -> GetEventID(), fFrame -> GetCoboID(), fFrame -> GetAsadID());
 
     return fFrame;
-  }
-  else if (frameNo >= fNumFrames) {
-    std::cout << "== Last frame reached! (" << fNumFrames - 1 << ")" << std::endl;
-
-    return NULL;
-  } else if (frameNo < 0) {
+  } else if (frameNo < -1) {
     std::cout << "== Frame number should be a positive integer!" << std::endl;
 
-    return NULL;
+    return 0;
   }
 
   while (1) {
@@ -234,17 +207,26 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo)
         std::cout << "== Skipping Frame No. " << fCurrentFrameID + 1 << std::endl;
 
       fGraw.ignore(1);
+
       fGraw.read(reinterpret_cast<Char_t *>(&frameSize), 3);
+
+      if (fGraw.eof()) {
+        std::cout << "== End of the file! (last frame: " << fCurrentFrameID << ")" << std::endl;
+
+        return 0;
+      }
 
       frameSize = (htonl(frameSize) >> 8)*64;
 
       fGraw.seekg((Int_t)fGraw.tellg() - 4 + frameSize);
+
       fCurrentFrameID++;
     }
 
     if (frameNo < fCurrentFrameID) {
-      SetFile(fFirstGraw.Data());
       fCurrentFrameID = -1;
+      fGraw.clear();
+      fGraw.seekg(0);
 
       return GetFrame(frameNo);
     }
@@ -259,14 +241,9 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo)
     fGraw.read(reinterpret_cast<Char_t *>(&asadIdx), 1);
 
     if (fGraw.eof()) {
-      std::cout << "== End of the file!" << std::endl;
+      std::cout << "== End of the file! (last frame: " << fCurrentFrameID << ")" << std::endl;
 
-      Bool_t isNextFile = IsNextFile();
-
-      if (isNextFile)
-        continue;
-      else
-        return NULL;
+      return 0;
     }
 
     headerSize = htons(headerSize)*64;
@@ -278,7 +255,7 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo)
     if (fDebugMode)
       PrintFrameInfo(frameNo, eventIdx, coboIdx, asadIdx);
 
-    if (fFrame != NULL)
+    if (fFrame != 0)
       delete fFrame;
 
     fFrame = new GETFrame();
