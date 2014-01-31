@@ -199,6 +199,11 @@ GETPlot *GETDecoder::GetGETPlot()
   return fGETPlot;
 }
 
+Int_t GETDecoder::GetFrameType()
+{
+  return fFrameType;
+}
+
 Int_t GETDecoder::GetCurrentFrameID()
 {
   return fCurrentFrameID;

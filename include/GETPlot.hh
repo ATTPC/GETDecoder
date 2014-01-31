@@ -69,7 +69,7 @@ class GETPlot : public TObject
     //! Internal method to reset canvases
     void ResetGraph(Int_t type, Bool_t first = 0);
     //! Internal method to print information on canvas
-    void PrintInfo(Int_t type, TPad *namePad, Int_t coboIdx, Int_t asadIdx, Int_t frameNo);
+    void PrintInfo(Int_t type, TPad *namePad, Int_t coboIdx, Int_t asadIdx, Int_t frameNo, Int_t eventNo);
 
     TH2D *fAsad;      //!< histogram for summary spectra of an AsAd
     TGraph *fGraph;   //!< graph for various purpose for drawing data

@@ -49,6 +49,8 @@ class GETDecoder : public TObject
 
     //! Return GETPlot object pointer if there exists. If not, create a new one and return it.
     GETPlot *GetGETPlot();
+    //! Return the frame type. This is used when drawing merged frame.
+    Int_t GetFrameType();
 
     //! Return the number of frames counted by CountFrames() method.
     Int_t GetCurrentFrameID();

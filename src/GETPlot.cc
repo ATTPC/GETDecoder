@@ -197,7 +197,7 @@ TCanvas *GETPlot::ShowRawFrame(Int_t frameNo, Int_t numChannels, Int_t *chList)
     ResetGraph(1);
 
   TPad *namePad = (TPad *) cvs -> FindObject("namePadType1");
-  PrintInfo(1, namePad, fFrame -> GetCoboID(), fFrame -> GetAsadID(), fFrame -> GetFrameID());
+  PrintInfo(1, namePad, fFrame -> GetCoboID(), fFrame -> GetAsadID(), fFrame -> GetFrameID(), fFrame -> GetEventID());
 
   for (Int_t iAget = 0; iAget < 4; iAget++) {
     for (Int_t iCh = 0; iCh < 68; iCh++) {
@@ -294,7 +294,7 @@ TCanvas *GETPlot::ShowFrame(Int_t frameNo, Int_t startTb, Int_t numTbs, Int_t nu
     ResetGraph(2);
 
   TPad *namePad = (TPad *) cvs -> FindObject("namePadType2");
-  PrintInfo(2, namePad, fFrame -> GetCoboID(), fFrame -> GetAsadID(), fFrame -> GetFrameID());
+  PrintInfo(2, namePad, fFrame -> GetCoboID(), fFrame -> GetAsadID(), fFrame -> GetFrameID(), fFrame -> GetEventID());
 
   for (Int_t iAget = 0; iAget < 4; iAget++) {
     for (Int_t iCh = 0; iCh < 68; iCh++) {
@@ -388,7 +388,7 @@ TCanvas *GETPlot::ShowAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
     ResetGraph(3);
 
   TPad *namePad = (TPad *) cvs -> FindObject("namePadType3");
-  PrintInfo(3, namePad, fFrame -> GetCoboID(), fFrame -> GetAsadID(), fFrame -> GetFrameID());
+  PrintInfo(3, namePad, fFrame -> GetCoboID(), fFrame -> GetAsadID(), fFrame -> GetFrameID(), fFrame -> GetEventID());
 
   for (Int_t iAget = 0; iAget < 4; iAget++) {
     Int_t divider = 0;
@@ -531,7 +531,7 @@ void GETPlot::ResetGraph(Int_t type, Bool_t first)
   }
 }
 
-void GETPlot::PrintInfo(Int_t type, TPad *namePad, Int_t coboIdx, Int_t asadIdx, Int_t frameNo)
+void GETPlot::PrintInfo(Int_t type, TPad *namePad, Int_t coboIdx, Int_t asadIdx, Int_t frameNo, Int_t eventNo)
 {
   namePad -> cd();
 
@@ -539,7 +539,7 @@ void GETPlot::PrintInfo(Int_t type, TPad *namePad, Int_t coboIdx, Int_t asadIdx,
   if (name)
     delete name;
 
-  name = new TText(0.5, 0.5, Form("CoBo %d - AsAd %d - Frame %d", coboIdx, asadIdx, frameNo));
+  name = new TText(0.5, 0.5, Form("CoBo %d - AsAd %d - Frame %d - Event %d", coboIdx, asadIdx, frameNo, eventNo));
   name -> SetName("frameInfo");
   name -> SetTextSize(0.40);
   name -> SetTextAlign(22);
