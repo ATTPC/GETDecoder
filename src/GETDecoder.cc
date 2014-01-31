@@ -55,6 +55,9 @@ GETDecoder::~GETDecoder()
 
 void GETDecoder::Initialize()
 {
+  fFrameType = -1;
+  fMergedHeaderSize = 0;
+
   fDebugMode = 0;
 
   fCurrentGrawID = -1;
@@ -141,6 +144,29 @@ Bool_t GETDecoder::SetData(Int_t index)
     std::cout << "== " << filename << " is opened!" << std::endl;
     fGraw.seekg(0);
 
+    UShort_t headerSize = 0;
+    fGraw.ignore(8);
+    fGraw.read(reinterpret_cast<Char_t *>(&headerSize), 2);
+    fGraw.seekg(0);
+
+    if (headerSize == 20) { // Merged frame by event number
+      fFrameType = 1;
+      fMergedHeaderSize = headerSize;
+    } else if (headerSize == 24) { // Merged frame by event time
+      fFrameType = 2;
+      fMergedHeaderSize = headerSize;
+    } else { // Normal frame by CoBo
+      fFrameType = 0;
+      fMergedHeaderSize = 0;
+    }
+
+
+    std::cout << "== Frame Type: ";
+    if (fFrameType == 0) std::cout << "Normal CoBo frame";
+    else if (fFrameType == 1) std::cout << "Event number merged frame";
+    else if (fFrameType == 2) std::cout << "Event time merged frame";
+    std::cout << std::endl;
+
     fCurrentGrawID = index;
 
     return 1;
@@ -154,7 +180,7 @@ Bool_t GETDecoder::SetNextFile()
 
 void GETDecoder::ShowList()
 {
-  std::cout << "== Index  GRAW file" << std::endl;
+  std::cout << "== Index GRAW file" << std::endl;
   for (Int_t iItem = 0; iItem < fGrawList.size(); iItem++) {
     if (iItem == fCurrentGrawID)
       std::cout << " *" << std::setw(6);
@@ -216,9 +242,12 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo)
         return 0;
       }
 
-      frameSize = (htonl(frameSize) >> 8)*64;
+      if (fFrameType != 0)
+        frameSize = (htonl(frameSize) >> 8);
+      else
+        frameSize = (htonl(frameSize) >> 8)*64;
 
-      fGraw.seekg((Int_t)fGraw.tellg() - 4 + frameSize);
+      fGraw.seekg((Int_t)fGraw.tellg() - 4 + frameSize + fMergedHeaderSize);
 
       fCurrentFrameID++;
     }
@@ -230,6 +259,8 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo)
 
       return GetFrame(frameNo);
     }
+
+    fGraw.ignore(fMergedHeaderSize);
 
     fGraw.ignore(8);
     fGraw.read(reinterpret_cast<Char_t *>(&headerSize), 2);

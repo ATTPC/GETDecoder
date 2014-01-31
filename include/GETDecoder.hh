@@ -62,6 +62,9 @@ class GETDecoder : public TObject
     //! Print the information of the returned frame.
     void PrintFrameInfo(Int_t frameID, Int_t eventID, Int_t coboID, Int_t asadID);
 
+    Int_t fFrameType;  //!< frame type. 0: normal frame, 1: event number merged, 2: event time merged
+    Int_t fMergedHeaderSize; //!< header size of merged frame. For additional skip bytes when finding frame by frame number.
+
     Bool_t fDebugMode; //!< flag for debug mode
 
     std::ifstream fGraw;            //!< rawdata filestream
