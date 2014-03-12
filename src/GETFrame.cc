@@ -27,8 +27,9 @@ GETFrame::GETFrame()
 
   for (Int_t i = 0; i < 4*68*GETNumTbs; i++) {
     fRawAdc[i] = 0;
-    fMaxAdcIdx[i%GETNumTbs] = 0;
+    fMaxAdcIdx[i/GETNumTbs] = 0;
     fAdc[i] = 0;
+    fPedestal[i/GETNumTbs] = 0;
   }
 }
 
@@ -108,13 +109,14 @@ void GETFrame::CalcPedestal(Int_t startTb, Int_t numTbs)
   GETMath *math = new GETMath();
   for (Int_t iAget = 0; iAget < 4; iAget++) {
     for (Int_t iCh = 0; iCh < 68; iCh++) {
-      Int_t index = GetIndex(iAget, iCh, startTb);
+      Int_t index = GetIndex(iAget, iCh, 0);
 
       math -> Reset();
       for (Int_t iTb = startTb; iTb < startTb + numTbs; iTb++)
         math -> Add(fRawAdc[index + iTb]);
 
-      index = GetIndex(iAget, iCh, 0);
+      fPedestal[index/GETNumTbs] = math -> GetMean();
+
       for (Int_t iTb = 0; iTb < GETNumTbs; iTb++) {
         Double_t adc = (math -> GetMean()) - fRawAdc[index + iTb];
         fAdc[index + iTb] = (adc < 0 || fRawAdc[index + iTb] == 0 ? 0 : adc);
@@ -175,6 +177,18 @@ Double_t GETFrame::GetADC(Int_t agetIdx, Int_t chIdx, Int_t buckIdx)
   Int_t index = GetIndex(agetIdx, chIdx, buckIdx);
 
   return fAdc[index]; 
+}
+
+Double_t GETFrame::GetPedestal(Int_t agetIdx, Int_t chIdx)
+{
+  if (!fPedestalSubtracted) {
+    std::cout << "== Run CalcPedstal(Int_t start, Int_t numBins) first!" << std::endl;
+
+    return -1;
+  }
+
+  Int_t index = GetIndex(agetIdx, chIdx, 0)/GETNumTbs;
+  return fPedestal[index];
 }
 
 Int_t GETFrame::GetIndex(Int_t agetIdx, Int_t chIdx, Int_t buckIdx)

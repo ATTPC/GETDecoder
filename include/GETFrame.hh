@@ -68,6 +68,8 @@ class GETFrame : public TObject
     Double_t *GetADC(Int_t agetIdx, Int_t chIdx);
     //! Return the pedestal-subtracted ADC value of the specific time bucket, **buckIdx**, of the channel, **chIdx**, in the AGET, **agetIdx**.
     Double_t GetADC(Int_t agetIdx, Int_t chIdx, Int_t buckIdx);
+    //! Return the pedestal value of channel, **chIdx**, in the AGET, **agetIdx**.
+    Double_t GetPedestal(Int_t agetIdx, Int_t chIdx);
 
   private:
     //! Internally used method to get the index of the array
@@ -82,6 +84,7 @@ class GETFrame : public TObject
     Bool_t fPedestalSubtracted;    //!< Boolean for checking if pedestal is subtracted
     Int_t fMaxAdcIdx[4*68];        //!< An array containing indices of maximum ADC value in each channel
     Double_t fAdc[4*68*GETNumTbs]; //!< An array containing pedestal-subtracted ADC values
+    Double_t fPedestal[4*68];      //!< An array containing pedestal value of corresponding channel
 
   //! Added for making dictionary by ROOT
   ClassDef(GETFrame, 1);

@@ -10,6 +10,7 @@
 // =================================================
 
 #include <iostream>
+#include <iomanip>
 
 #include "TStyle.h"
 #include "TCanvas.h"
@@ -436,6 +437,64 @@ TCanvas *GETPlot::ShowAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
     cvs -> cd(iAget + 1);
     fGraph -> DrawGraph(GETNumTbs, tb, charge, "PL same");
   }
+
+  return cvs;
+}
+
+TCanvas *GETPlot::PrintMax(Int_t eventNo, Int_t startTb, Int_t numTbs)
+{
+  if (fDecoder == NULL) {
+    std::cout << "== GETDecoder is not set!" << std::endl;
+
+    return 0;
+  }
+
+  TCanvas *cvs = (TCanvas *) gROOT -> FindObject("cvsType0");
+  if (!cvs)
+    cvs = PrepareCanvas(0);
+  else
+    fAsad -> Reset();
+
+  fFrame = fDecoder -> GetFrame(eventNo);
+  fAsad -> SetTitle(Form("CoBo %d - AsAd %d - Event %d", fFrame -> GetCoboID(), fFrame -> GetAsadID(), eventNo));
+
+  fFrame -> CalcPedestal(startTb, numTbs);
+
+  std::cout << "== " << std::setw(10) << "AGET No." << std::setw(10) << "Ch No.";
+  std::cout << std::setw(10) << "Base" << std::setw(10) << "Max ADC";
+  std::cout << std::setw(10) << "Diff." << std::endl;
+  for (Int_t iAget = 0; iAget < 4; iAget++) {
+    for (Int_t iCh = 0; iCh < 68; iCh++) {
+      Int_t maxADCIdx = fFrame -> GetMaxADCIdx(iAget, iCh);
+      fAsad -> Fill(iAget*68 + iCh, fFrame -> GetRawADC(iAget, iCh, maxADCIdx));
+      std::cout << "   " << std::setw(10) << iAget << std::setw(10) << iCh;
+      std::cout << std::setw(10) << fFrame -> GetPedestal(iAget, iCh);
+      std::cout << std::setw(10) << fFrame -> GetRawADC(iAget, iCh, maxADCIdx);
+      std::cout << std::setw(10) << fFrame -> GetPedestal(iAget, iCh) - fFrame -> GetRawADC(iAget, iCh, maxADCIdx) << std::endl;
+    }
+  }
+
+  cvs -> Update();
+
+  TPaletteAxis *axis = (TPaletteAxis *) fAsad -> GetListOfFunctions() -> FindObject("palette");
+  axis -> SetX2NDC(0.975);
+  axis -> GetAxis() -> SetTickSize(0.008);
+  axis -> SetLabelSize(0.045);
+  axis -> SetLabelOffset(-0.005);
+
+  Double_t maskChannel[5] = {11, 22, 45, 56, 67};
+  for (Int_t iAget = 0; iAget < 4; iAget++) {
+    for (Int_t iMask = 0; iMask < 5; iMask++) {
+      Double_t pointX1[2] = {iAget*68 + maskChannel[iMask] - 0.5, iAget*68 + maskChannel[iMask] - 0.5};
+      Double_t pointX2[2] = {iAget*68 + maskChannel[iMask] + 0.5, iAget*68 + maskChannel[iMask] + 0.5};
+      Double_t pointY[2] = {-0.5, 4095.5};
+      fGraph -> SetLineColor(15);
+      fGraph -> DrawGraph(2, pointX1, pointY, "L same");
+      fGraph -> DrawGraph(2, pointX2, pointY, "L same");
+    }
+  }
+
+  cvs -> Update();
 
   return cvs;
 }

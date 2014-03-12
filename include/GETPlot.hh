@@ -53,6 +53,8 @@ class GETPlot : public TObject
     TCanvas *ShowFrame(Int_t frameNo = -1, Int_t startTb = 10, Int_t numTbs = 20, Int_t numChannels = 0, Int_t *chList = NULL);
     //! Draw averaged-raw signals in the frame whose number is frameNo.
     TCanvas *ShowAverage(Int_t numChannels, Int_t *chList, Int_t frameNo = -1);
+    //! Print Maximum values
+    TCanvas *PrintMax(Int_t eventNo, Int_t startTb, Int_t numTbs);
 
   private:
     //! Initialize variables.
