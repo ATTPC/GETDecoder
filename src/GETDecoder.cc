@@ -22,6 +22,7 @@
 #include "GETDecoder.hh"
 #include "GETFrame.hh"
 #include "GETPlot.hh"
+#include "GETMath.hh"
 
 ClassImp(GETDecoder);
 
@@ -197,6 +198,14 @@ GETPlot *GETDecoder::GetGETPlot()
     fGETPlot = new GETPlot(this);
 
   return fGETPlot;
+}
+
+GETMath *GETDecoder::GetGETMath()
+{
+  if (!fGETMath)
+    fGETMath = new GETMath(this);
+
+  return fGETMath;
 }
 
 Int_t GETDecoder::GetFrameType()

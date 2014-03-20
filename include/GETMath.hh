@@ -15,6 +15,11 @@
 #include "TObject.h"
 #include "TROOT.h"
 
+#include "GETConfig.hh"
+
+class GETDecoder;
+class GETFrame;
+
 /*!
   * Basically, what this class does is the same as TH1D class in ROOT. 
   * The difference is that this class only provides the **mean** and **RMS** values.
@@ -26,6 +31,8 @@ class GETMath : public TObject
   public:
     //! Constructor
     GETMath();
+    //! Constructor with GETDecoder class pointer
+    GETMath(GETDecoder *decoder);
     //! Destructor
     virtual ~GETMath();
 
@@ -35,14 +42,22 @@ class GETMath : public TObject
     Double_t GetMean();
     //! Return the calculated **RMS** value.
     Double_t GetRMS();
+    
+    //! Temporary
+    Double_t **GetAverage(Int_t numChannels, Int_t *chList, Int_t frameNo = -1);
 
     //! Reset all the values.
     void Reset();
 
   private:
+    GETDecoder *fDecoder; //!< GETDecoder class pointer
+    GETFrame *fFrame; //!< GETFrame class pointer
+
     Int_t fNumValues; //!< Number of values added
     Double_t fMean; //!< mean value
     Double_t fRms; //!< RMS value
+    
+    Double_t *fAdc[4]; //!< aosidfjasodfj
 
   //! Added for dictionary making by ROOT
   ClassDef(GETMath, 1); 

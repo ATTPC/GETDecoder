@@ -31,7 +31,7 @@ void plot04(Char_t *filename) {
     return;
   }
 
-  gSystem -> Load("ibGETDecoder");
+  gSystem -> Load("libGETDecoder");
 
   GETDecoder *decoder = new GETDecoder(filename);
   GETPlot *plot = decoder -> GetGETPlot();

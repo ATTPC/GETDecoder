@@ -24,6 +24,7 @@
 
 class GETFrame;
 class GETPlot;
+class GETMath;
 
 /** Read the raw file from GET electronics and process it into GETFrame class **/
 class GETDecoder : public TObject
@@ -49,6 +50,8 @@ class GETDecoder : public TObject
 
     //! Return GETPlot object pointer if there exists. If not, create a new one and return it.
     GETPlot *GetGETPlot();
+    //! Return GETMath object pointer if there exists. If not, create a new one and return it.
+    GETMath *GetGETMath();
     //! Return the frame type. This is used when drawing merged frame.
     Int_t GetFrameType();
 
@@ -77,6 +80,7 @@ class GETDecoder : public TObject
     Int_t fCurrentFrameID; //!< current frame index
 
     GETPlot *fGETPlot;     //!< GETPlot pointer
+    GETMath *fGETMath;     //!< GETMath pointer
 
   ClassDef(GETDecoder, 1); //!< added for making dictionary by ROOT
 };
