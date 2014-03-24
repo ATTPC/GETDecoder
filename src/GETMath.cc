@@ -62,12 +62,23 @@ Double_t GETMath::GetRMS()
 Double_t **GETMath::GetAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
 {
   /**
-    * Explanation will be here.
+    * This method calculates the average value of channels listed in **chList** for each time bucket in the frame **frameNo**.
+    * It returns two dimentional **Double_t** type array. The first dimension is the AGET number which runs from 0 to 3 and
+    * the second dimension is the time bucket number which runs from 0 to **GETNumTbs** set in **GETConfig.hh**.
+    * Returned array is **mean**, for example, then array[2][50] is the averaged value of the time bucket 50 in AGET 2.
+    * 
+    * If the **numChannels** is negative number, the method calculates average value of all the channels except the channels in **chList**.
+    * If the **numChannels** is positive number, the method calculates average value of the channels in **chList**.
+    *
+    * When **frameNo** is omitted or given as -1, calling the method will give you the average value of the next frame continueously.
    **/
 
-  for (Int_t iAget = 0; iAget < 4; iAget++)
+  for (Int_t iAget = 0; iAget < 4; iAget++) {
+    fAdc[iAget] = new Double_t[GETNumTbs];
+
     for (Int_t iTb = 0; iTb < GETNumTbs; iTb++)
       fAdc[iAget][iTb] = 0;
+  }
 
   if (fDecoder == NULL) {
     std::cout << "== GETDecoder is not set!" << std::endl;
@@ -148,7 +159,4 @@ void GETMath::Reset()
   fNumValues = 0;
   fMean = 0;
   fRms = 0;
-
-  for (Int_t iAget = 0; iAget < 4; iAget++)
-    fAdc[iAget] = new Double_t[GETNumTbs];
 }

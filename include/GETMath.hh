@@ -56,9 +56,9 @@ class GETMath : public TObject
     Int_t fNumValues; //!< Number of values added
     Double_t fMean; //!< mean value
     Double_t fRms; //!< RMS value
-    
-    Double_t *fAdc[4]; //!< aosidfjasodfj
 
+    Double_t *fAdc[4]; //!< Average value storage for GetAverage() method
+    
   //! Added for dictionary making by ROOT
   ClassDef(GETMath, 1); 
 };

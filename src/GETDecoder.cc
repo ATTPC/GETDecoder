@@ -50,8 +50,14 @@ GETDecoder::GETDecoder(Char_t *filename)
 
 GETDecoder::~GETDecoder()
 {
-  if(fFrame != 0)
+  if (fFrame != 0)
     delete fFrame;
+
+  if (fGETPlot != 0)
+    delete fGETPlot;
+
+  if (fGETMath != 0)
+    delete fGETMath;
 }
 
 void GETDecoder::Initialize()
@@ -89,9 +95,8 @@ void GETDecoder::AddGraw(const Char_t *filename)
 
   TString path = "";
   if (numElements == 0)
-    path = ".";
+    path = gSystem -> pwd();
   else {
-    path = "/";
     for (Int_t i = 0; i < numElements; i++) {
       path.Append(((TObjString *) pathElements -> At(i)) -> GetString());
       path.Append("/");
@@ -124,7 +129,7 @@ void GETDecoder::AddGraw(const Char_t *filename)
 
 Bool_t GETDecoder::SetData(Int_t index)
 {
-  if (fGrawList.size() < index) {
+  if (fGrawList.size() <= index) {
     std::cout << "== End of list!" << std::endl;
 
     return 0;
