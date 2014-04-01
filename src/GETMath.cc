@@ -21,6 +21,7 @@ ClassImp(GETMath);
 
 GETMath::GETMath()
 {
+  fDecoder = 0;
   Reset();
 }
 
@@ -153,7 +154,6 @@ Double_t **GETMath::GetAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
 
 void GETMath::Reset()
 {
-  fDecoder = 0;
   fFrame = 0;
 
   fNumValues = 0;
