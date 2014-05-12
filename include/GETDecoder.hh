@@ -38,7 +38,7 @@ class GETDecoder : public TObject
     ~GETDecoder();
 
     //! Setting debug mode. If set to 1, more information is printed out on the screen.
-    void SetDebugMode(Bool_t value);
+    void SetDebugMode(Bool_t value = 1);
     //! Add the data file to the list of rawdata.
     void AddGraw(const Char_t *filename);
     //! Set the data file to the class.
@@ -57,8 +57,11 @@ class GETDecoder : public TObject
 
     //! Return the number of frames counted by CountFrames() method.
     Int_t GetCurrentFrameID();
-    //! Return specific frame of given frame number. If frameIdx is -1, thie method returns next frame.
+    //! Return the number of inner frame in the current frame.
+    Int_t GetCurrentInnerFrameID();
+    //! Return specific frame of the given frame number. If **frameIdx** is -1, this method returns next frame.
     GETFrame *GetFrame(Int_t frameIdx = -1);
+    GETFrame *GetFrame(Int_t frameIdx, Int_t innerFrameIdx);
 
   private:
     //! Initialize variables used in the class.
@@ -69,6 +72,8 @@ class GETDecoder : public TObject
 
     Int_t fFrameType;  //!< frame type. 0: normal frame, 1: event number merged, 2: event time merged
     Int_t fMergedHeaderSize; //!< header size of merged frame. For additional skip bytes when finding frame by frame number.
+    Int_t fNumMergedFrames; //!< the number of merged frames. For additional skip bytes when finding frame by frame number.
+    UInt_t fCurrentMergedFrameSize; //!< size of merged frame of the frame ID **fCurrentFrameID**. For additional skip bytes when finding frame by frame number.
 
     Bool_t fDebugMode; //!< flag for debug mode
 
@@ -78,6 +83,7 @@ class GETDecoder : public TObject
 
     GETFrame *fFrame;      //!< frame container
     Int_t fCurrentFrameID; //!< current frame index
+    Int_t fCurrentInnerFrameID; //!< current inner frame index
 
     GETPlot *fGETPlot;     //!< GETPlot pointer
     GETMath *fGETMath;     //!< GETMath pointer
