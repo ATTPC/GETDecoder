@@ -70,14 +70,31 @@ class GETDecoder : public TObject
     //! Print the information of the returned frame.
     void PrintFrameInfo(Int_t frameID, Int_t eventID, Int_t coboID, Int_t asadID);
 
+    //! Skip a frame for accessing frames behind. This method also used in merged frame to skip an inner frame.
+    void SkipInnerFrame();
+
+    //! Skip a merged frame for accessing frames behind.
+    void SkipMergedFrame();
+
+    //! Get needed information of given frame to the internal variables
+    void ReadMergedFrameInfo();
+    //! Get needed information of given inner frame to the internal variables
+    void ReadInnerFrameInfo();
+
+    //! Check if the file is end
+    Bool_t CheckEOF();
+
     Int_t fFrameType;  //!< frame type. 0: normal frame, 1: event number merged, 2: event time merged
     Int_t fMergedHeaderSize; //!< header size of merged frame. For additional skip bytes when finding frame by frame number.
     Int_t fNumMergedFrames; //!< the number of merged frames. For additional skip bytes when finding frame by frame number.
-    UInt_t fCurrentMergedFrameSize; //!< size of merged frame of the frame ID **fCurrentFrameID**. For additional skip bytes when finding frame by frame number.
+    UInt_t fMergedFrameStartPoint; //!< byte number of the merged frame start point. For navigational feature in a merged frame.
+    UInt_t fCurrentMergedFrameSize; //!< size of a merged frame of the frame ID **fCurrentFrameID**. For additional skip bytes when finding frame by frame number.
+    UInt_t fCurrentInnerFrameSize; //!< size of an inner frame.
 
     Bool_t fDebugMode; //!< flag for debug mode
 
     std::ifstream fGraw;            //!< rawdata filestream
+    UInt_t fFileSize; //!< file size
     std::vector<TString> fGrawList; //!< rawdata file list
     Int_t fCurrentGrawID;        //!< current file index in list
 

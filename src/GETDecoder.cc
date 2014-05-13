@@ -150,6 +150,9 @@ Bool_t GETDecoder::SetData(Int_t index)
 
     return 0;
   } else {
+    std::ifstream forFileSize(filename.Data(), std::ios::ate|std::ios::binary);
+    fFileSize = forFileSize.tellg();
+
     std::cout << "== " << filename << " is opened!" << std::endl;
     fGraw.seekg(0);
 
@@ -174,7 +177,6 @@ Bool_t GETDecoder::SetData(Int_t index)
       fFrameType = 0;
       fMergedHeaderSize = 0;
     }
-
 
     std::cout << "== Frame Type: ";
     if (fFrameType == 0) std::cout << "Normal CoBo frame";
@@ -240,7 +242,7 @@ Int_t GETDecoder::GetCurrentInnerFrameID()
 GETFrame *GETDecoder::GetFrame(Int_t frameNo)
 {
   if (fFrameType != 0)
-    return GetFrame(frameNo, 0);
+    return GetFrame(frameNo, -1);
 
   if (frameNo == -1)
     frameNo = fCurrentFrameID + 1;
@@ -356,30 +358,52 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo, Int_t innerFrameNo)
   if (fFrameType == 0)
     return GetFrame(frameNo);
 
-  if (frameNo == -1 && innerFrameNo == -1) {
-    if (fCurrentFrameID == -1 && fCurrentFrameID == -1) {
-      frameNo = fCurrentFrameID + 1;
-      innerFrameNo = fCurrentInnerFrameID + 1;
+  ReadMergedFrameInfo();
 
-      fGraw.ignore(1);
-      fGraw.read(reinterpret_cast<Char_t *>(&fCurrentMergedFrameSize), 3);
-      fGraw.ignore(8);
-      fGraw.read(reinterpret_cast<Char_t *>(&fNumMergedFrames), 4);
-      fGraw.seekg((Int_t)fGraw.tellg() - 16);
+  if (frameNo == -1 && innerFrameNo == -1) {
+    if (fCurrentFrameID == -1 && fCurrentInnerFrameID == -1) {
+      frameNo = 0;
+      innerFrameNo = 0;
     } else if (fCurrentInnerFrameID + 1 == fNumMergedFrames) {
       frameNo = fCurrentFrameID + 1;
       innerFrameNo = 0;
       fCurrentInnerFrameID = -1;
-
-      fGraw.ignore(1);
-      fGraw.read(reinterpret_cast<Char_t *>(&fCurrentMergedFrameSize), 3);
-      fGraw.ignore(8);
-      fGraw.read(reinterpret_cast<Char_t *>(&fNumMergedFrames), 4);
-      fGraw.seekg((Int_t)fGraw.tellg() - 16);
     } else {
       frameNo = fCurrentFrameID;
       innerFrameNo = fCurrentInnerFrameID + 1;
     }
+  } else if (frameNo == -1 && innerFrameNo != -1) {
+    frameNo = fCurrentFrameID + 1;
+  } else if (frameNo != -1 && innerFrameNo == -1) {
+    innerFrameNo = fCurrentInnerFrameID + 1;
+
+    if (frameNo == fCurrentFrameID && fCurrentInnerFrameID + 1 == fNumMergedFrames) {
+      std::cout << "== Reached the end of the merged frame!" << std::endl;
+      
+      return 0;
+    } else if (frameNo != fCurrentFrameID) {
+      fCurrentInnerFrameID = -1;
+      innerFrameNo = 0;
+    }
+  }
+
+  // Skip the frames until it reaches the given frame number, frameNo.
+  while ((frameNo > fCurrentFrameID) && (frameNo > 0)) {
+    fGraw.clear();
+
+    if (fDebugMode)
+      std::cout << "== Skipping Frame No. " << fCurrentFrameID + 1 << std::endl;
+
+    SkipMergedFrame();
+    ReadMergedFrameInfo();
+
+    if (CheckEOF()) {
+      std::cout << "== End of the file! (last frame: " << fCurrentFrameID << ")" << std::endl;
+
+      return 0;
+    }
+
+    fCurrentFrameID++;
   }
 
   if (fCurrentFrameID == frameNo && fCurrentInnerFrameID == innerFrameNo) {
@@ -391,117 +415,95 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo, Int_t innerFrameNo)
     std::cout << "== Frame number or inner frame number should be a positive integer!" << std::endl;
 
     return 0;
+  } else if (innerFrameNo >= fNumMergedFrames) {
+    std::cout << "== Inner frame number should be smaller than " << fNumMergedFrames << std::endl;
+
+    return 0;
   }
 
-  while (1) {
-    UInt_t frameSize;
-    UShort_t headerSize;
-    UInt_t nItems;
-    UInt_t eventIdx;
-    UShort_t coboIdx;
-    UShort_t asadIdx;
+  if (frameNo < fCurrentFrameID || innerFrameNo < fCurrentInnerFrameID) {
+    fCurrentFrameID = -1;
+    fCurrentInnerFrameID = -1;
+    fGraw.clear();
+    fGraw.seekg(0);
 
-    // Skip the frames until it reaches the given frame number, frameNo.
-    while (frameNo > fCurrentFrameID + 1) {
-      fGraw.clear();
-
-      if (fDebugMode)
-        std::cout << "== Skipping Frame No. " << fCurrentFrameID + 2 << std::endl;
-
-      if (fCurrentInnerFrameID != 0)
-        fGraw.ignore((fNumMergedFrames - fCurrentInnerFrameID - 1)*(fCurrentMergedFrameSize - fMergedHeaderSize)/fNumMergedFrames);
-
-      fGraw.ignore(1);
-
-      fGraw.read(reinterpret_cast<Char_t *>(&frameSize), 3);
-
-      if (fGraw.eof()) {
-        std::cout << "== End of the file! (last frame: " << fCurrentFrameID << ")" << std::endl;
-
-        return 0;
-      }
-
-      fGraw.seekg((Int_t)fGraw.tellg() - 4 + frameSize);
-
-      fCurrentFrameID++;
-    }
-
-    if (frameNo < fCurrentFrameID || innerFrameNo < fCurrentInnerFrameID) {
-      fCurrentFrameID = -1;
-      fCurrentInnerFrameID = -1;
-      fGraw.clear();
-      fGraw.seekg(0);
-
-      return GetFrame(frameNo, innerFrameNo);
-    }
-
-    if (innerFrameNo == 0)
-      fGraw.ignore(fMergedHeaderSize);
-
-    std::cout << "frameNo: " << frameNo << std::endl;
-    std::cout << "innerFrameNo: " << innerFrameNo << std::endl;
-    std::cout << "fCurrentFrameID: " << fCurrentFrameID << std::endl;
-    std::cout << "fCurrentInnerFrameID: " << fCurrentInnerFrameID << std::endl;
-    std::cout << "fMergedHeaderSize: " << fMergedHeaderSize << std::endl;
-    std::cout << "fCurrentMergedFrameSize: " << fCurrentMergedFrameSize << std::endl;
-    std::cout << "fNumMergedFrames: " << fNumMergedFrames << std::endl;
-
-    fGraw.ignore(8);
-    fGraw.read(reinterpret_cast<Char_t *>(&headerSize), 2);
-    fGraw.ignore(2);
-    fGraw.read(reinterpret_cast<Char_t *>(&nItems), 4);
-    fGraw.ignore(6);
-    fGraw.read(reinterpret_cast<Char_t *>(&eventIdx), 4);
-    fGraw.read(reinterpret_cast<Char_t *>(&coboIdx), 1);
-    fGraw.read(reinterpret_cast<Char_t *>(&asadIdx), 1);
-
-    if (fGraw.eof()) {
-      std::cout << "== End of the file! (last frame: " << fCurrentFrameID << ")" << std::endl;
-
-      return 0;
-    }
-
-    headerSize = htons(headerSize)*64;
-    nItems = htonl(nItems);
-    eventIdx = htonl(eventIdx);
-    coboIdx = (htons(coboIdx) >> 8);
-    asadIdx = (htons(asadIdx) >> 8);
-
-    if (fDebugMode)
-      PrintFrameInfo(frameNo, eventIdx, coboIdx, asadIdx);
-
-    if (fFrame != 0)
-      delete fFrame;
-
-    fFrame = new GETFrame();
-    fFrame -> SetEventID(eventIdx);
-    fFrame -> SetCoboID(coboIdx);
-    fFrame -> SetAsadID(asadIdx);
-    fFrame -> SetFrameID(frameNo);
-
-    fGraw.seekg((Int_t) fGraw.tellg() - 28 + headerSize);
-
-    UInt_t data;
-    for (Int_t iItem = 0; iItem < nItems; iItem++) {
-      fGraw.read(reinterpret_cast<Char_t *>(&data), 4);
-      data = htonl(data);
-
-      UShort_t agetIdx = ((data & 0xc0000000) >> 30);
-      UShort_t chanIdx = ((data & 0x3f800000) >> 23);
-      UShort_t buckIdx = ((data & 0x007fc000) >> 14);
-      UShort_t sample = (data & 0x00000fff);         
-
-      if (chanIdx >= 68 || agetIdx >= 4 || buckIdx >= GETNumTbs)
-        continue; 
-                                                                     
-      fFrame -> SetRawADC(agetIdx, chanIdx, buckIdx, sample); 
-    }
-
-    fCurrentFrameID = frameNo;
-    fCurrentInnerFrameID = innerFrameNo;
-
-    return fFrame;
+    return GetFrame(frameNo, innerFrameNo);
   }
+
+  UInt_t frameSize;
+  UShort_t headerSize;
+  UInt_t nItems;
+  UInt_t eventIdx;
+  UShort_t coboIdx;
+  UShort_t asadIdx;
+
+  fGraw.ignore(fMergedHeaderSize);
+
+  for (Int_t iSkip = 0; iSkip < innerFrameNo; iSkip++) {
+    ReadInnerFrameInfo();
+    SkipInnerFrame();
+  }
+
+  fGraw.ignore(8);
+  fGraw.read(reinterpret_cast<Char_t *>(&headerSize), 2);
+  fGraw.ignore(2);
+  fGraw.read(reinterpret_cast<Char_t *>(&nItems), 4);
+  fGraw.ignore(6);
+  fGraw.read(reinterpret_cast<Char_t *>(&eventIdx), 4);
+  fGraw.read(reinterpret_cast<Char_t *>(&coboIdx), 1);
+  fGraw.read(reinterpret_cast<Char_t *>(&asadIdx), 1);
+
+  headerSize = htons(headerSize)*64;
+  nItems = htonl(nItems);
+  eventIdx = htonl(eventIdx);
+  coboIdx = (htons(coboIdx) >> 8);
+  asadIdx = (htons(asadIdx) >> 8);
+
+  if (fDebugMode)
+    PrintFrameInfo(frameNo, eventIdx, coboIdx, asadIdx);
+
+  if (fFrame != 0)
+    delete fFrame;
+
+  fFrame = new GETFrame();
+  fFrame -> SetEventID(eventIdx);
+  fFrame -> SetCoboID(coboIdx);
+  fFrame -> SetAsadID(asadIdx);
+  fFrame -> SetFrameID(frameNo);
+
+  fGraw.seekg((Int_t) fGraw.tellg() - 28 + headerSize);
+
+  UInt_t data;
+  for (Int_t iItem = 0; iItem < nItems; iItem++) {
+    fGraw.read(reinterpret_cast<Char_t *>(&data), 4);
+    data = htonl(data);
+
+    UShort_t agetIdx = ((data & 0xc0000000) >> 30);
+    UShort_t chanIdx = ((data & 0x3f800000) >> 23);
+    UShort_t buckIdx = ((data & 0x007fc000) >> 14);
+    UShort_t sample = (data & 0x00000fff);         
+
+    if (chanIdx >= 68 || agetIdx >= 4 || buckIdx >= GETNumTbs)
+      continue; 
+                                                                   
+    fFrame -> SetRawADC(agetIdx, chanIdx, buckIdx, sample); 
+  }
+
+  fGraw.seekg(fMergedFrameStartPoint);
+
+  fCurrentFrameID = frameNo;
+  fCurrentInnerFrameID = innerFrameNo;
+
+  std::cout << "frameNo: " << frameNo << std::endl;
+  std::cout << "innerFrameNo: " << innerFrameNo << std::endl;
+  std::cout << "fCurrentFrameID: " << fCurrentFrameID << std::endl;
+  std::cout << "fCurrentInnerFrameID: " << fCurrentInnerFrameID << std::endl;
+  std::cout << "fMergedHeaderSize: " << fMergedHeaderSize << std::endl;
+  std::cout << "fCurrentMergedFrameSize: " << fCurrentMergedFrameSize << std::endl;
+  std::cout << "fNumMergedFrames: " << fNumMergedFrames << std::endl;
+  std::cout << "fMergedFrameStartPoint: " << fMergedFrameStartPoint << std::endl;
+
+  return fFrame;
 }
 
 void GETDecoder::PrintFrameInfo(Int_t frameNo, Int_t eventID, Int_t coboID, Int_t asadID)
@@ -511,4 +513,40 @@ void GETDecoder::PrintFrameInfo(Int_t frameNo, Int_t eventID, Int_t coboID, Int_
   std::cout << " Event:" << eventID;
   std::cout << " CoBo:" << coboID;
   std::cout << " AsAd:" << asadID << std::endl;
+}
+
+void GETDecoder::SkipInnerFrame()
+{
+  fGraw.ignore(fCurrentInnerFrameSize);
+}
+
+void GETDecoder::SkipMergedFrame()
+{
+  fGraw.ignore(fCurrentMergedFrameSize);
+}
+
+void GETDecoder::ReadMergedFrameInfo()
+{
+  fMergedFrameStartPoint = fGraw.tellg();
+  fGraw.ignore(1);
+  fGraw.read(reinterpret_cast<Char_t *>(&fCurrentMergedFrameSize), 3);
+  fGraw.ignore(8);
+  fGraw.read(reinterpret_cast<Char_t *>(&fNumMergedFrames), 4);
+  fGraw.seekg((Int_t)fGraw.tellg() - 16);
+}
+
+void GETDecoder::ReadInnerFrameInfo()
+{
+  fGraw.ignore(1);
+  fGraw.read(reinterpret_cast<Char_t *>(&fCurrentInnerFrameSize), 3);
+  fGraw.seekg((Int_t)fGraw.tellg() - 4);
+
+  fCurrentInnerFrameSize = (htonl(fCurrentInnerFrameSize) >> 8)*64;
+}
+
+Bool_t GETDecoder::CheckEOF() {
+  if (fGraw.tellg() == fFileSize)
+    return 1;
+  else
+    return 0;
 }
