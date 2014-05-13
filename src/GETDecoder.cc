@@ -494,14 +494,16 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo, Int_t innerFrameNo)
   fCurrentFrameID = frameNo;
   fCurrentInnerFrameID = innerFrameNo;
 
-  std::cout << "frameNo: " << frameNo << std::endl;
-  std::cout << "innerFrameNo: " << innerFrameNo << std::endl;
-  std::cout << "fCurrentFrameID: " << fCurrentFrameID << std::endl;
-  std::cout << "fCurrentInnerFrameID: " << fCurrentInnerFrameID << std::endl;
-  std::cout << "fMergedHeaderSize: " << fMergedHeaderSize << std::endl;
-  std::cout << "fCurrentMergedFrameSize: " << fCurrentMergedFrameSize << std::endl;
-  std::cout << "fNumMergedFrames: " << fNumMergedFrames << std::endl;
-  std::cout << "fMergedFrameStartPoint: " << fMergedFrameStartPoint << std::endl;
+  if (fDebugMode) {
+    std::cout << "frameNo: " << frameNo << std::endl;
+    std::cout << "innerFrameNo: " << innerFrameNo << std::endl;
+    std::cout << "fCurrentFrameID: " << fCurrentFrameID << std::endl;
+    std::cout << "fCurrentInnerFrameID: " << fCurrentInnerFrameID << std::endl;
+    std::cout << "fMergedHeaderSize: " << fMergedHeaderSize << std::endl;
+    std::cout << "fCurrentMergedFrameSize: " << fCurrentMergedFrameSize << std::endl;
+    std::cout << "fNumMergedFrames: " << fNumMergedFrames << std::endl;
+    std::cout << "fMergedFrameStartPoint: " << fMergedFrameStartPoint << std::endl;
+  }
 
   return fFrame;
 }
