@@ -82,7 +82,7 @@ class GETDecoder : public TObject
     void ReadInnerFrameInfo();
 
     //! Check if the file is end
-    Bool_t CheckEOF();
+    void CheckEOF();
 
     Int_t fFrameType;  //!< frame type. 0: normal frame, 1: event number merged, 2: event time merged
     Int_t fMergedHeaderSize; //!< header size of merged frame. For additional skip bytes when finding frame by frame number.
@@ -101,6 +101,7 @@ class GETDecoder : public TObject
     GETFrame *fFrame;      //!< frame container
     Int_t fCurrentFrameID; //!< current frame index
     Int_t fCurrentInnerFrameID; //!< current inner frame index
+    Bool_t fEOF; //!< check if end of file
 
     GETPlot *fGETPlot;     //!< GETPlot pointer
     GETMath *fGETMath;     //!< GETMath pointer

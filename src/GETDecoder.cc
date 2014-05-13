@@ -361,7 +361,11 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo, Int_t innerFrameNo)
   ReadMergedFrameInfo();
 
   if (frameNo == -1 && innerFrameNo == -1) {
-    if (fCurrentFrameID == -1 && fCurrentInnerFrameID == -1) {
+    if (fEOF == 1) {
+      std::cout << "== End of the file! (last frame: " << fCurrentFrameID << ")" << std::endl;
+
+      return 0;
+    } else if (fCurrentFrameID == -1 && fCurrentInnerFrameID == -1) {
       frameNo = 0;
       innerFrameNo = 0;
     } else if (fCurrentInnerFrameID + 1 == fNumMergedFrames) {
@@ -387,25 +391,6 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo, Int_t innerFrameNo)
     }
   }
 
-  // Skip the frames until it reaches the given frame number, frameNo.
-  while ((frameNo > fCurrentFrameID) && (frameNo > 0)) {
-    fGraw.clear();
-
-    if (fDebugMode)
-      std::cout << "== Skipping Frame No. " << fCurrentFrameID + 1 << std::endl;
-
-    SkipMergedFrame();
-    ReadMergedFrameInfo();
-
-    if (CheckEOF()) {
-      std::cout << "== End of the file! (last frame: " << fCurrentFrameID << ")" << std::endl;
-
-      return 0;
-    }
-
-    fCurrentFrameID++;
-  }
-
   if (fCurrentFrameID == frameNo && fCurrentInnerFrameID == innerFrameNo) {
     if (fDebugMode)
       PrintFrameInfo(frameNo, fFrame -> GetEventID(), fFrame -> GetCoboID(), fFrame -> GetAsadID());
@@ -426,8 +411,41 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo, Int_t innerFrameNo)
     fCurrentInnerFrameID = -1;
     fGraw.clear();
     fGraw.seekg(0);
+    ReadMergedFrameInfo();
+    CheckEOF();
 
     return GetFrame(frameNo, innerFrameNo);
+  }
+
+  // Skip the frames until it reaches the given frame number, frameNo.
+  while ((frameNo > fCurrentFrameID) && (frameNo > 0)) {
+    if (fCurrentFrameID == -1) {
+      fCurrentFrameID++;
+      continue;
+    }
+
+    fGraw.clear();
+
+    if (fDebugMode)
+      std::cout << "== Skipping Frame No. " << fCurrentFrameID << std::endl;
+
+    SkipMergedFrame();
+    CheckEOF();
+    ReadMergedFrameInfo();
+
+    if (fEOF) {
+      std::cout << "== End of the file! (last frame: " << fCurrentFrameID << ")" << std::endl;
+
+      return 0;
+    }
+
+    fCurrentFrameID++;
+  }
+
+  if (fEOF) {
+    std::cout << "== End of the file! (last frame: " << fCurrentFrameID << ")" << std::endl;
+
+    return 0;
   }
 
   UInt_t frameSize;
@@ -489,6 +507,9 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo, Int_t innerFrameNo)
     fFrame -> SetRawADC(agetIdx, chanIdx, buckIdx, sample); 
   }
 
+  CheckEOF();
+
+  // Return to merged frame head
   fGraw.seekg(fMergedFrameStartPoint);
 
   fCurrentFrameID = frameNo;
@@ -546,9 +567,9 @@ void GETDecoder::ReadInnerFrameInfo()
   fCurrentInnerFrameSize = (htonl(fCurrentInnerFrameSize) >> 8)*64;
 }
 
-Bool_t GETDecoder::CheckEOF() {
-  if (fGraw.tellg() == fFileSize)
-    return 1;
+void GETDecoder::CheckEOF() {
+  if (fGraw.tellg() >= fFileSize || fGraw.fail())
+    fEOF = 1;
   else
-    return 0;
+    fEOF = 0;
 }
