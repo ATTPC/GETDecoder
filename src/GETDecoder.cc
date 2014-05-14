@@ -435,6 +435,7 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo, Int_t innerFrameNo)
 
     if (fEOF) {
       std::cout << "== End of the file! (last frame: " << fCurrentFrameID << ")" << std::endl;
+      fCurrentInnerFrameID = fNumMergedFrames - 1;
 
       return 0;
     }
