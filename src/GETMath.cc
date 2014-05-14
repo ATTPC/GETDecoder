@@ -105,7 +105,7 @@ Double_t **GETMath::GetAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
       std::cout << " of all channels except" << std::endl;
     std::cout << " > ";
 
-    for (Int_t iCh = 0; iCh < abs(numChannels); iCh++)
+    for (Int_t iCh = 0; iCh < abs((Double_t)numChannels); iCh++)
       std::cout << chList[iCh] << " ";
     std::cout << std::endl;
   }
