@@ -7,6 +7,9 @@
 //  Log:
 //    - 2013. 10. 24
 //      Start writing class
+//
+//  Note:
+//    2014. 05. 16          Adapted for VIGRU
 // =================================================
 
 #ifndef _GETMATH_H_
@@ -15,10 +18,6 @@
 #include "TObject.h"
 #include "TROOT.h"
 
-#include "GETConfig.hh"
-
-class GETDecoder;
-class GETFrame;
 
 /*!
   * Basically, what this class does is the same as TH1D class in ROOT. 
@@ -31,8 +30,6 @@ class GETMath : public TObject
   public:
     //! Constructor
     GETMath();
-    //! Constructor with GETDecoder class pointer
-    GETMath(GETDecoder *decoder);
     //! Destructor
     virtual ~GETMath();
 
@@ -43,21 +40,13 @@ class GETMath : public TObject
     //! Return the calculated **RMS** value.
     Double_t GetRMS();
     
-    //! Temporary
-    Double_t **GetAverage(Int_t numChannels, Int_t *chList, Int_t frameNo = -1);
-
     //! Reset all the values.
     void Reset();
 
   private:
-    GETDecoder *fDecoder; //!< GETDecoder class pointer
-    GETFrame *fFrame; //!< GETFrame class pointer
-
     Int_t fNumValues; //!< Number of values added
     Double_t fMean; //!< mean value
     Double_t fRms; //!< RMS value
-
-    Double_t *fAdc[4]; //!< Average value storage for GetAverage() method
     
   //! Added for dictionary making by ROOT
   ClassDef(GETMath, 1); 

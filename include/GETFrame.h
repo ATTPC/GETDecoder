@@ -7,17 +7,19 @@
 //  Log:
 //    - 2013. 09. 23
 //      Start writing class
+//
+//  Note:
+//    2014. 05. 16          Adapted for VIGRU
 // =================================================
 
 #ifndef _GETFRAME_H_
 #define _GETFRAME_H_
 
-#include "GETConfig.hh"
-#ifdef __CINT__
-extern const Int_t GETNumTbs;
-#endif
-
 #include "TObject.h"
+
+#define GETNumTbs 512
+
+class GETMath;
 
 /**
   * Storage of a frame from CoBo
@@ -31,6 +33,8 @@ class GETFrame : public TObject
 
     //! Destructor
     ~GETFrame();
+
+    void Reset();
 
     //! Set the event number.
     void SetEventID(UInt_t value);
@@ -85,6 +89,7 @@ class GETFrame : public TObject
     Int_t fMaxAdcIdx[4*68];        //!< An array containing indices of maximum ADC value in each channel
     Double_t fAdc[4*68*GETNumTbs]; //!< An array containing pedestal-subtracted ADC values
     Double_t fPedestal[4*68];      //!< An array containing pedestal value of corresponding channel
+    GETMath *fMath;
 
   //! Added for making dictionary by ROOT
   ClassDef(GETFrame, 1);

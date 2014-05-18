@@ -7,17 +7,29 @@
 //  Log:
 //    - 2013. 09. 23
 //      Start writing class
+//
+//  Note:
+//    2014. 05. 16          Adapted for VIGRU
 // =================================================
 
 #include <iostream>
 #include <cmath>
 
-#include "GETFrame.hh"
-#include "GETMath.hh"
+#include "GETFrame.h"
+#include "GETMath.h"
 
 ClassImp(GETFrame);
 
 GETFrame::GETFrame()
+{
+  Reset();
+  fMath = new GETMath();
+}
+
+GETFrame::~GETFrame()
+{}
+
+void GETFrame::Reset()
 {
   fEventIdx = 0;
   fCoboIdx = 0;
@@ -32,9 +44,6 @@ GETFrame::GETFrame()
     fPedestal[i/GETNumTbs] = 0;
   }
 }
-
-GETFrame::~GETFrame()
-{}
 
 void GETFrame::SetEventID(UInt_t value)
 {
@@ -106,19 +115,18 @@ void GETFrame::CalcPedestal(Int_t startTb, Int_t numTbs)
     * GetADC() method.
   **/
   
-  GETMath *math = new GETMath();
   for (Int_t iAget = 0; iAget < 4; iAget++) {
     for (Int_t iCh = 0; iCh < 68; iCh++) {
       Int_t index = GetIndex(iAget, iCh, 0);
 
-      math -> Reset();
+      fMath -> Reset();
       for (Int_t iTb = startTb; iTb < startTb + numTbs; iTb++)
-        math -> Add(fRawAdc[index + iTb]);
+        fMath -> Add(fRawAdc[index + iTb]);
 
-      fPedestal[index/GETNumTbs] = math -> GetMean();
+      fPedestal[index/GETNumTbs] = fMath -> GetMean();
 
       for (Int_t iTb = 0; iTb < GETNumTbs; iTb++) {
-        Double_t adc = (math -> GetMean()) - fRawAdc[index + iTb];
+        Double_t adc = (fMath -> GetMean()) - fRawAdc[index + iTb];
         fAdc[index + iTb] = (adc < 0 || fRawAdc[index + iTb] == 0 ? 0 : adc);
 
         // Discard the first and the last bins
@@ -129,7 +137,6 @@ void GETFrame::CalcPedestal(Int_t startTb, Int_t numTbs)
       }
     }
   }
-  delete math;
 
   fPedestalSubtracted = 1;
 }
