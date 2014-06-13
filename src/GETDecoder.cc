@@ -62,6 +62,8 @@ GETDecoder::~GETDecoder()
 
 void GETDecoder::Initialize()
 {
+  fNumTbs = 512;
+
   fFrameType = -1;
   fMergedHeaderSize = 0;
   fNumMergedFrames = 0;
@@ -76,6 +78,11 @@ void GETDecoder::Initialize()
   fCurrentInnerFrameID = -1;
 
   fGETPlot = 0;
+}
+
+void GETDecoder::SetNumTbs(Int_t value)
+{
+  fNumTbs = value;
 }
 
 void GETDecoder::SetDebugMode(Bool_t value)
@@ -206,6 +213,11 @@ void GETDecoder::ShowList()
 
     std::cout << iItem << "  " << fGrawList.at(iItem) << std::endl;
   }
+}
+
+Int_t GETDecoder::GetNumTbs()
+{
+  return fNumTbs;
 }
 
 GETPlot *GETDecoder::GetGETPlot()
@@ -341,7 +353,7 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo)
       UShort_t buckIdx = ((data & 0x007fc000) >> 14);
       UShort_t sample = (data & 0x00000fff);         
 
-      if (chanIdx >= 68 || agetIdx >= 4 || buckIdx >= GETNumTbs)
+      if (chanIdx >= 68 || agetIdx >= 4 || buckIdx >= 512)
         continue; 
                                                                      
       fFrame -> SetRawADC(agetIdx, chanIdx, buckIdx, sample); 
@@ -502,7 +514,7 @@ GETFrame *GETDecoder::GetFrame(Int_t frameNo, Int_t innerFrameNo)
     UShort_t buckIdx = ((data & 0x007fc000) >> 14);
     UShort_t sample = (data & 0x00000fff);         
 
-    if (chanIdx >= 68 || agetIdx >= 4 || buckIdx >= GETNumTbs)
+    if (chanIdx >= 68 || agetIdx >= 4 || buckIdx >= 512)
       continue; 
                                                                    
     fFrame -> SetRawADC(agetIdx, chanIdx, buckIdx, sample); 

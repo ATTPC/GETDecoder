@@ -11,6 +11,8 @@ void readFrame01() {
   gSystem -> Load("libGETDecoder");
 
   GETDecoder *decoder = new GETDecoder("GRAWFILE.graw");
+  // The number of time buckets in a frame should be set unless it's not 512.
+  decoder -> SetNumTbs(512);
   
   GETFrame *frame = NULL;
   while ((frame = decoder -> GetFrame())) { 
@@ -21,7 +23,8 @@ void readFrame01() {
     Int_t rawadc = 0;
     for (Int_t iAget = 0; iAget < 4; iAget++) {
       for (Int_t iCh = 0; iCh < 68; iCh++) {
-        for (Int_t iTb = 0; iTb < 512; iTb++) {
+        Int_t maxTb = decoder -> GetNumTbs();
+        for (Int_t iTb = 0; iTb < maxTb; iTb++) {
           rawadc = frame -> GetRawADC(iAget, iCh, iTb);
 
           // Implement what you want to do with a frame here.

@@ -34,6 +34,9 @@ void plot04(Char_t *filename) {
   gSystem -> Load("libGETDecoder");
 
   GETDecoder *decoder = new GETDecoder(filename);
+  // The number of time buckets in a frame should be set unless it's not 512.
+  decoder -> SetNumTbs(512);
+
   GETPlot *plot = decoder -> GetGETPlot();
 
   GETFrame *frame = decoder -> GetFrame(0);

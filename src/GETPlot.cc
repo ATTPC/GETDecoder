@@ -46,10 +46,10 @@ GETPlot::~GETPlot()
 
 void GETPlot::Initialize()
 {
-  minTb = 0;
-  maxTb = GETNumTbs;
+  fMinTb = 0;
+  fMaxTb = 512;
 
-  SetAgetRange(-1, -1, minTb - 1, maxTb + 1, -10, 4106);
+  SetAgetRange(-1, -1, fMinTb - 1, fMaxTb + 1, -10, 4106);
 
   fDecoder = NULL;
 
@@ -64,7 +64,9 @@ void GETPlot::SetDecoder(GETDecoder *decoder)
 {
   fDecoder = decoder;
 
-  SetAgetRange(-1, -1, minTb - 1, maxTb + 1, -10, 4106);
+  fMaxTb = decoder -> GetNumTbs();
+
+  SetAgetRange(-1, -1, fMinTb - 1, fMaxTb + 1, -10, 4106);
 
   TCanvas *cvs = NULL;
   for (Int_t i = 0; i < 3; i++) {
@@ -225,10 +227,10 @@ TCanvas *GETPlot::ShowRawFrame(Int_t frameNo, Int_t numChannels, Int_t *chList)
       Int_t *rawadc = fFrame -> GetRawADC(iAget, iCh);
       
       Int_t numSamples = 0;
-      Int_t tb[GETNumTbs] = {0};
-      Int_t charge[GETNumTbs] = {0};
+      Int_t tb[512] = {0};
+      Int_t charge[512] = {0};
 
-      for (Int_t iTb = 0; iTb < GETNumTbs; iTb++) {
+      for (Int_t iTb = 0; iTb < fMaxTb; iTb++) {
         if (rawadc[iTb] == 0)
           continue;
         
@@ -323,10 +325,10 @@ TCanvas *GETPlot::ShowFrame(Int_t frameNo, Int_t startTb, Int_t numTbs, Int_t nu
       adc = fFrame -> GetADC(iAget, iCh);
       
       Int_t numSamples = 0;
-      Double_t tb[GETNumTbs] = {0};
-      Double_t charge[GETNumTbs] = {0};
+      Double_t tb[512] = {0};
+      Double_t charge[512] = {0};
 
-      for (Int_t iTb = 0; iTb < GETNumTbs; iTb++) {
+      for (Int_t iTb = 0; iTb < fMaxTb; iTb++) {
 //        if (rawadc[iTb] == 0)
 //          continue;
         
@@ -393,8 +395,8 @@ TCanvas *GETPlot::ShowAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
 
   for (Int_t iAget = 0; iAget < 4; iAget++) {
     Int_t divider = 0;
-    Double_t tb[GETNumTbs] = {0};
-    Double_t charge[GETNumTbs] = {0};
+    Double_t tb[512] = {0};
+    Double_t charge[512] = {0};
 
     for (Int_t iCh = 0; iCh < 68; iCh++) {
       Bool_t isSkip = 0;
@@ -419,7 +421,7 @@ TCanvas *GETPlot::ShowAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
 
       Int_t *rawadc = fFrame -> GetRawADC(iAget, iCh);
 
-      for (Int_t iTb = 0; iTb < GETNumTbs; iTb++) {
+      for (Int_t iTb = 0; iTb < fMaxTb; iTb++) {
         tb[iTb] = iTb;
         charge[iTb] += rawadc[iTb];
       }
@@ -427,7 +429,7 @@ TCanvas *GETPlot::ShowAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
       divider++;
     }
 
-    for (Int_t iTb = 0; iTb < GETNumTbs; iTb++) 
+    for (Int_t iTb = 0; iTb < fMaxTb; iTb++) 
       charge[iTb] /= (Double_t) divider;
 
     fGraph -> SetMarkerColor(2);
@@ -435,7 +437,7 @@ TCanvas *GETPlot::ShowAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
     fGraph -> SetMarkerStyle(2);
     fGraph -> SetMarkerSize(0.3);
     cvs -> cd(iAget + 1);
-    fGraph -> DrawGraph(GETNumTbs, tb, charge, "PL same");
+    fGraph -> DrawGraph(fMaxTb, tb, charge, "PL same");
   }
 
   return cvs;

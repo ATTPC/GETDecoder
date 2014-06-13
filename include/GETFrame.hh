@@ -12,11 +12,6 @@
 #ifndef _GETFRAME_H_
 #define _GETFRAME_H_
 
-#include "GETConfig.hh"
-#ifdef __CINT__
-extern const Int_t GETNumTbs;
-#endif
-
 #include "TObject.h"
 
 /**
@@ -79,11 +74,11 @@ class GETFrame : public TObject
     Int_t fCoboIdx;                //!< CoBo index
     Int_t fAsadIdx;                //!< AsAd index
     Int_t fFrameIdx;               //!< frame index
-    Int_t fRawAdc[4*68*GETNumTbs]; //!< An array containing raw ADC values
+    Int_t fRawAdc[4*68*512]; //!< An array containing raw ADC values
 
     Bool_t fPedestalSubtracted;    //!< Boolean for checking if pedestal is subtracted
     Int_t fMaxAdcIdx[4*68];        //!< An array containing indices of maximum ADC value in each channel
-    Double_t fAdc[4*68*GETNumTbs]; //!< An array containing pedestal-subtracted ADC values
+    Double_t fAdc[4*68*512]; //!< An array containing pedestal-subtracted ADC values
     Double_t fPedestal[4*68];      //!< An array containing pedestal value of corresponding channel
 
   //! Added for making dictionary by ROOT

@@ -31,6 +31,9 @@ void average01(Char_t *filename) {
   gSystem -> Load("libGETDecoder");
 
   GETDecoder *decoder = new GETDecoder(filename);
+  // The number of time buckets in a frame should be set unless it's not 512.
+  decoder -> SetNumTbs(512);
+
   GETMath *math = decoder -> GetGETMath();
 
   GETFrame *frame = decoder -> GetFrame(0);

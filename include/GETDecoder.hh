@@ -16,8 +16,6 @@
 #include <fstream>
 #include <vector>
 
-#include "GETConfig.hh"
-
 #include "TObject.h"
 #include "TROOT.h"
 #include "TString.h"
@@ -39,6 +37,8 @@ class GETDecoder : public TObject
 
     //! Setting debug mode. If set to 1, more information is printed out on the screen.
     void SetDebugMode(Bool_t value = 1);
+    //! Setting the number of time buckets.
+    void SetNumTbs(Int_t value = 512);
     //! Add the data file to the list of rawdata.
     void AddGraw(const Char_t *filename);
     //! Set the data file to the class.
@@ -48,6 +48,8 @@ class GETDecoder : public TObject
     //! Print rawdata file list on the screen.
     void ShowList();
 
+    //! Return the number of time buckets.
+    Int_t GetNumTbs();
     //! Return GETPlot object pointer if there exists. If not, create a new one and return it.
     GETPlot *GetGETPlot();
     //! Return GETMath object pointer if there exists. If not, create a new one and return it.
@@ -83,6 +85,8 @@ class GETDecoder : public TObject
 
     //! Check if the file is end
     void CheckEOF();
+
+    Int_t fNumTbs; //!< the number of time buckets. It's determined when taking data and should be changed manually by user. (Default: 512)
 
     Int_t fFrameType;  //!< frame type. 0: normal frame, 1: event number merged, 2: event time merged
     Int_t fMergedHeaderSize; //!< header size of merged frame. For additional skip bytes when finding frame by frame number.

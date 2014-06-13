@@ -12,6 +12,8 @@ void readFrame02() {
   gSystem -> Load("libGETDecoder");
 
   GETDecoder *decoder = new GETDecoder("GRAWFILE.graw");
+  // The number of time buckets in a frame should be set unless it's not 512.
+  decoder -> SetNumTbs(512);
   
   GETFrame *frame = NULL;
   while ((frame = decoder -> GetFrame())) { 

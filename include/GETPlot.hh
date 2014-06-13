@@ -12,8 +12,6 @@
 #ifndef _GETPLOT_H_
 #define _GETPLOT_H_
 
-#include "GETConfig.hh"
-
 #include "TObject.h"
 
 class GETDecoder;
@@ -60,8 +58,8 @@ class GETPlot : public TObject
     //! Initialize variables.
     void Initialize();
 
-    Int_t minTb; //!< minimum time bucket index for drawing
-    Int_t maxTb; //!< maximum time bucket index for drawing
+    Int_t fMinTb; //!< minimum time bucket index for drawing
+    Int_t fMaxTb; //!< maximum time bucket index for drawing
 
     GETDecoder *fDecoder; //!< decoder pointer
     GETFrame *fFrame;     //!< frame container pointer

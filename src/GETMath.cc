@@ -65,7 +65,7 @@ Double_t **GETMath::GetAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
   /**
     * This method calculates the average value of channels listed in **chList** for each time bucket in the frame **frameNo**.
     * It returns two dimentional **Double_t** type array. The first dimension is the AGET number which runs from 0 to 3 and
-    * the second dimension is the time bucket number which runs from 0 to **GETNumTbs** set in **GETConfig.hh**.
+    * the second dimension is the time bucket number which runs from 0 to **fDecoder -> GetNumTbs()**.
     * Returned array is **mean**, for example, then array[2][50] is the averaged value of the time bucket 50 in AGET 2.
     * 
     * If the **numChannels** is negative number, the method calculates average value of all the channels except the channels in **chList**.
@@ -74,18 +74,21 @@ Double_t **GETMath::GetAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
     * When **frameNo** is omitted or given as -1, calling the method will give you the average value of the next frame continueously.
    **/
 
-  for (Int_t iAget = 0; iAget < 4; iAget++) {
-    fAdc[iAget] = new Double_t[GETNumTbs];
-
-    for (Int_t iTb = 0; iTb < GETNumTbs; iTb++)
-      fAdc[iAget][iTb] = 0;
-  }
-
   if (fDecoder == NULL) {
     std::cout << "== GETDecoder is not set!" << std::endl;
 
     return 0;
   }
+
+  Int_t maxTb = fDecoder -> GetNumTbs();
+
+  for (Int_t iAget = 0; iAget < 4; iAget++) {
+    fAdc[iAget] = new Double_t[512];
+
+    for (Int_t iTb = 0; iTb < 512; iTb++)
+      fAdc[iAget][iTb] = 0;
+  }
+
 
   if (frameNo == -1)
     fFrame = fDecoder -> GetFrame();
@@ -112,7 +115,7 @@ Double_t **GETMath::GetAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
 
   for (Int_t iAget = 0; iAget < 4; iAget++) {
     Int_t divider = 0;
-    Double_t tb[GETNumTbs] = {0};
+    Double_t tb[512] = {0};
 
     for (Int_t iCh = 0; iCh < 68; iCh++) {
       Bool_t isSkip = 0;
@@ -137,7 +140,7 @@ Double_t **GETMath::GetAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
 
       Int_t *rawadc = fFrame -> GetRawADC(iAget, iCh);
 
-      for (Int_t iTb = 0; iTb < GETNumTbs; iTb++) {
+      for (Int_t iTb = 0; iTb < maxTb; iTb++) {
         tb[iTb] = iTb;
         fAdc[iAget][iTb] += rawadc[iTb];
       }
@@ -145,7 +148,7 @@ Double_t **GETMath::GetAverage(Int_t numChannels, Int_t *chList, Int_t frameNo)
       divider++;
     }
 
-    for (Int_t iTb = 0; iTb < GETNumTbs; iTb++) 
+    for (Int_t iTb = 0; iTb < maxTb; iTb++) 
       fAdc[iAget][iTb] /= (Double_t) divider;
   }
 

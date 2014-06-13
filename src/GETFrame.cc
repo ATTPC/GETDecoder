@@ -25,11 +25,11 @@ GETFrame::GETFrame()
 
   fPedestalSubtracted = 0;
 
-  for (Int_t i = 0; i < 4*68*GETNumTbs; i++) {
+  for (Int_t i = 0; i < 4*68*512; i++) {
     fRawAdc[i] = 0;
-    fMaxAdcIdx[i/GETNumTbs] = 0;
+    fMaxAdcIdx[i/512] = 0;
     fAdc[i] = 0;
-    fPedestal[i/GETNumTbs] = 0;
+    fPedestal[i/512] = 0;
   }
 }
 
@@ -115,16 +115,16 @@ void GETFrame::CalcPedestal(Int_t startTb, Int_t numTbs)
       for (Int_t iTb = startTb; iTb < startTb + numTbs; iTb++)
         math -> Add(fRawAdc[index + iTb]);
 
-      fPedestal[index/GETNumTbs] = math -> GetMean();
+      fPedestal[index/512] = math -> GetMean();
 
-      for (Int_t iTb = 0; iTb < GETNumTbs; iTb++) {
+      for (Int_t iTb = 0; iTb < 512; iTb++) {
         Double_t adc = (math -> GetMean()) - fRawAdc[index + iTb];
         fAdc[index + iTb] = (adc < 0 || fRawAdc[index + iTb] == 0 ? 0 : adc);
 
         // Discard the first and the last bins
-        if (iTb > 0 && iTb < GETNumTbs - 1) {
-          if (fAdc[index + iTb] > fAdc[index + fMaxAdcIdx[index/GETNumTbs]])
-            fMaxAdcIdx[index/GETNumTbs] = iTb;
+        if (iTb > 0 && iTb < 512 - 1) {
+          if (fAdc[index + iTb] > fAdc[index + fMaxAdcIdx[index/512]])
+            fMaxAdcIdx[index/512] = iTb;
         }
       }
     }
@@ -144,7 +144,7 @@ Int_t GETFrame::GetMaxADCIdx(Int_t agetIdx, Int_t chIdx)
     return -1;
   }
 
-  Int_t index = GetIndex(agetIdx, chIdx, 0)/GETNumTbs;
+  Int_t index = GetIndex(agetIdx, chIdx, 0)/512;
 
   return fMaxAdcIdx[index];
 }
@@ -187,7 +187,7 @@ Double_t GETFrame::GetPedestal(Int_t agetIdx, Int_t chIdx)
     return -1;
   }
 
-  Int_t index = GetIndex(agetIdx, chIdx, 0)/GETNumTbs;
+  Int_t index = GetIndex(agetIdx, chIdx, 0)/512;
   return fPedestal[index];
 }
 
@@ -201,11 +201,11 @@ Int_t GETFrame::GetIndex(Int_t agetIdx, Int_t chIdx, Int_t buckIdx)
     std::cout << "== Channel number should be in [0,67]!" << std::endl;
 
     return -1;
-  } else if (buckIdx > GETNumTbs) {
-    std::cout << "== Channel number should be in [0," << GETNumTbs << "]!" << std::endl;
+  } else if (buckIdx > 512) {
+    std::cout << "== Channel number should be in [0," << 512 << "]!" << std::endl;
 
     return -1;
   }
 
-  return agetIdx*68*GETNumTbs + chIdx*GETNumTbs + buckIdx;
+  return agetIdx*68*512 + chIdx*512 + buckIdx;
 }

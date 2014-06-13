@@ -15,8 +15,6 @@
 #include "TObject.h"
 #include "TROOT.h"
 
-#include "GETConfig.hh"
-
 class GETDecoder;
 class GETFrame;
 
